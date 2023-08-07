@@ -13,31 +13,34 @@
 #define RPSYNTH_CONCEPTS_H
 
 #include <type_traits>
+#include <cmath>
+#include <JuceHeader.h>
+#include "synthesizer/types.h"
 
 namespace rpSynth {
 template<typename Type>
-concept FloatingData = std::is_floating_point_v<Type>;
-
-static constexpr size_t kMaxPolyphonic = 8;
-static constexpr int kMinMidiEventIntervalTimeInSamples = 8;
-
-template<FloatingData Type>
-static Type getMidiNoteInHertz(Type semitone, Type frequencyOfA = static_cast<Type>(440)) noexcept {
+static Type semitoneToHertz(Type semitone, Type frequencyOfA = static_cast<Type>(440)) noexcept {
     return frequencyOfA * std::pow(static_cast<Type>(2), (semitone - static_cast<Type>(69)) / static_cast<Type>(12));
 }
 
-template<std::random_access_iterator RandomIterator,typename Type>
-static void interpole(RandomIterator container,
-                      size_t beginIndex, Type valueBegin,
-                      size_t endIndex, Type valueEnd) {
-    Type interval = (valueEnd - valueBegin) / (endIndex - beginIndex);
-    Type x = valueBegin;
-
-    for (size_t i = beginIndex; i < endIndex; i++) {
-        container[i] = x;
-        x += interval;
-    }
+template<typename Type>
+static Type hertzToSemitone(Type hz, Type frequencyOfA = static_cast<Type>(440)) noexcept {
+    jassert(hz > 0);
+    return static_cast<Type>(69) + static_cast<Type>(12) * std::log2(hz / frequencyOfA);
 }
+
+inline static const rpSynth::audio::FType kStOf20hz = rpSynth::hertzToSemitone(20.f);
+inline static const rpSynth::audio::FType kStOf20000hz = rpSynth::hertzToSemitone(20000.f);
+
+inline static const struct MyStrings {
+    const juce::String kXMLConfigTag = "RPBasicSynthesizer";
+    const juce::String kAPVTSParameterTag = "RPBasicSynthesizerParameters";
+    const juce::String kLineGeneratorTag = "LineGenerator";
+    const juce::String kModulationSettingsTag = "ModulationSettings";
+    const juce::String kParameterLinkTag = "ParamLink";
+    const juce::String kLineGeneratorNumPointTag = "NumPoints";
+    const juce::String kLineGeneratorPointTag = "Point";
+}g_myStrings;
 }
 
 #endif // !RPSYNTH_CONCEPTS_H

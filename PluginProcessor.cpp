@@ -22,10 +22,17 @@ RPBasicSynthesizerAudioProcessor::RPBasicSynthesizerAudioProcessor()
                        )
 #endif
 {
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    m_synthesizer.addParameterToLayout(layout);
+    m_apvts = std::make_unique<juce::AudioProcessorValueTreeState>(*this,
+                                                                   nullptr,
+                                                                   rpSynth::g_myStrings.kAPVTSParameterTag,
+                                                                   std::move(layout));
 }
 
 RPBasicSynthesizerAudioProcessor::~RPBasicSynthesizerAudioProcessor()
 {
+    m_apvts = nullptr;
 }
 
 //==============================================================================
@@ -77,16 +84,16 @@ int RPBasicSynthesizerAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void RPBasicSynthesizerAudioProcessor::setCurrentProgram (int index)
+void RPBasicSynthesizerAudioProcessor::setCurrentProgram (int /*index*/)
 {
 }
 
-const juce::String RPBasicSynthesizerAudioProcessor::getProgramName (int index)
+const juce::String RPBasicSynthesizerAudioProcessor::getProgramName (int /*index*/)
 {
     return {};
 }
 
-void RPBasicSynthesizerAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void RPBasicSynthesizerAudioProcessor::changeProgramName (int /*index*/, const juce::String& /*newName*/)
 {
 }
 
@@ -95,7 +102,8 @@ void RPBasicSynthesizerAudioProcessor::prepareToPlay (double sampleRate, int sam
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    m_synthesizer.prepare(sampleRate, static_cast<size_t>(samplesPerBlock));
+    m_synthesizer.prepare((float)sampleRate, samplesPerBlock);
+    m_synthesizer.prepareParameters((float)sampleRate, samplesPerBlock);
 }
 
 void RPBasicSynthesizerAudioProcessor::releaseResources()
@@ -171,12 +179,25 @@ void RPBasicSynthesizerAudioProcessor::getStateInformation (juce::MemoryBlock& d
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    juce::XmlElement outputXML{rpSynth::g_myStrings.kXMLConfigTag};
+    outputXML.addChildElement(m_apvts->copyState().createXml().release());
+    m_synthesizer.saveExtraState(outputXML);
+    
+    copyXmlToBinary(outputXML, destData);
+    outputXML.writeTo(juce::File("C:\\Users\\mana\\Desktop\\config.xml"));
 }
 
 void RPBasicSynthesizerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    auto xml = getXmlFromBinary(data, sizeInBytes);
+    if (xml == nullptr) return;
+
+    auto* apvtsXML = xml->getChildByName(rpSynth::g_myStrings.kAPVTSParameterTag);
+    if (apvtsXML == nullptr) return;
+    m_apvts->replaceState(juce::ValueTree::fromXml(*apvtsXML));
+    m_synthesizer.loadExtraState(*xml, *m_apvts);
 }
 
 //==============================================================================

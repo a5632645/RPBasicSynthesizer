@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 
-#include "synthesizer/synthesizer.h"
+#include "synthesizer/BasicSynthesizer.h"
 //==============================================================================
 /**
 */
@@ -57,7 +57,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    rpSynth::BasicSynthesizer<float> m_synthesizer;
+    rpSynth::audio::BasicSynthesizer m_synthesizer{"synth"};
+    std::unique_ptr<juce::AudioProcessorValueTreeState> m_apvts;
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RPBasicSynthesizerAudioProcessor)

@@ -10,37 +10,45 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-RPBasicSynthesizerAudioProcessorEditor::RPBasicSynthesizerAudioProcessorEditor (RPBasicSynthesizerAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
-{
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (400, 300);
+RPBasicSynthesizerAudioProcessorEditor::RPBasicSynthesizerAudioProcessorEditor(RPBasicSynthesizerAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
+    , m_allModulationPanel(audioProcessor.m_synthesizer, this)
+    , m_filterPanel1(audioProcessor.m_synthesizer.m_filter)
+    , OscillorPanel(audioProcessor.m_synthesizer.m_polyOscillor) {
+    // init modulation panel
+    addAndMakeVisible(m_allModulationPanel);
+    m_allModulationPanel.setTopMostComponent(this);
 
-    m_noteOn.setButtonText("note on");
-    addAndMakeVisible(m_noteOn);
+    // init oscillor panel here
+    addAndMakeVisible(OscillorPanel);
 
-    m_noteoff.setButtonText("note off");
-    addAndMakeVisible(m_noteoff);
+    // init filter panel
+    addAndMakeVisible(m_filterPanel1);
 
-    m_velocity.setRange(0.f, 1.f, 0.1f);
-    addAndMakeVisible(m_velocity);
+    // init window
+    setSize(800, 600);
+    setResizable(true, true);
 
-    m_noteNumber.setRange(0.f, 127.f, 1.f);
-    addAndMakeVisible(m_noteNumber);
+    // final init
+    m_allModulationPanel.init();
 }
 
-RPBasicSynthesizerAudioProcessorEditor::~RPBasicSynthesizerAudioProcessorEditor()
-{
+RPBasicSynthesizerAudioProcessorEditor::~RPBasicSynthesizerAudioProcessorEditor() {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================
-void RPBasicSynthesizerAudioProcessorEditor::paint (juce::Graphics& g)
-{
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-
+void RPBasicSynthesizerAudioProcessorEditor::paint(juce::Graphics& /*g*/) {
 }
 
-void RPBasicSynthesizerAudioProcessorEditor::resized()
-{
+void RPBasicSynthesizerAudioProcessorEditor::resized() {
+    OscillorPanel.setBoundsRelative(0.f, 0.f, 0.3f, 0.3f);
+    m_filterPanel1.setBoundsRelative(0.f, 0.3f, 0.4f, 0.3f);
+    m_allModulationPanel.setBoundsRelative(0.f, 0.6f, 1.f, 0.4f);
+}
+
+void RPBasicSynthesizerAudioProcessorEditor::notifyShowModulationFrom(rpSynth::audio::ModulatorBase* p, rpSynth::ui::ModulationPanel*) {
+    m_allModulationPanel.showModulationFrom(p);
+    OscillorPanel.showModulationFrom(p);
+    m_filterPanel1.showModulationFrom(p);
 }
