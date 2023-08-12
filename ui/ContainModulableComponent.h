@@ -18,6 +18,6 @@ class ModulatorBase;
 namespace rpSynth::ui {
 class ContainModulableComponent : public juce::Component {
 public:
-    virtual void showModulationFrom(audio::ModulatorBase*) = 0;
+    virtual void showModulationFrom(audio::ModulatorBase* m) = 0;
 };
 };

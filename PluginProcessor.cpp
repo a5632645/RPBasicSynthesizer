@@ -191,6 +191,7 @@ void RPBasicSynthesizerAudioProcessor::setStateInformation (const void* data, in
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
     auto xml = getXmlFromBinary(data, sizeInBytes);
     if (xml == nullptr) return;
 

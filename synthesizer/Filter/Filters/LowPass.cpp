@@ -16,8 +16,9 @@
 
 namespace rpSynth::audio::filters {
 void LowPass::process(rpSynth::audio::StereoBuffer& input, rpSynth::audio::StereoBuffer& output, size_t begin, size_t end) {
+    m_parameters.cutoff.applySemitoneToHertz(begin, end);
     for (size_t i = begin; i < end; i++) {
-        FType cutoff = semitoneToHertz(m_parameters.cutoff.get(i)) * m_oneDivSampleRate * 2.f;
+        FType cutoff = m_parameters.cutoff.getRaw(i) * m_oneDivNyquistRate;
         FType res = m_parameters.resonance.get(i);
         FType lv = m_parameters.limitVolume.get(i);
         FType lk = m_parameters.limitK.get(i);
@@ -33,7 +34,7 @@ void LowPass::reset() {
 }
 
 void LowPass::prepare(rpSynth::audio::FType sampleRate, size_t /*numSamples*/) {
-    m_oneDivSampleRate = 1 / sampleRate;
+    m_oneDivNyquistRate = 2 / sampleRate;
 }
 
 void LowPass::doLayout(ui::FilterKnobsPanel& p) {

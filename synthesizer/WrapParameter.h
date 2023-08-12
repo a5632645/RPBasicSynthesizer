@@ -32,7 +32,7 @@ class MyHostedAudioProcessorParameter;
 */
 class MyAudioProcessParameter {
 public:
-    static constexpr FType kSmoothTimeInSeconds = static_cast<FType>(0.005);
+    static constexpr FType kSmoothTimeInSeconds = static_cast<FType>(0.05);// 50ms
 
     /**
      * @brief construct a parameter for audio thread's processors
@@ -57,16 +57,16 @@ public:
     // get
 
     /**
-     * @brief 获取Juce::range从[0,1]转换后的数字
-     * @param index 指定位置
-     * @return 返回的数字在你绑定的juce::RangedAudioParameter的范围内
+     * @brief 禄帽脠隆Juce::range麓脫[0,1]脳陋禄禄潞贸碌脛脢媒脳脰
+     * @param index 脰赂露篓脦禄脰脙
+     * @return 路碌禄脴碌脛脢媒脳脰脭脷脛茫掳贸露篓碌脛juce::RangedAudioParameter碌脛路露脦搂脛脷
     */
     inline FType get(size_t index) const;
 
     /**
-     * @brief 获取归一化的值
-     * @param index 指定位置
-     * @return 归一化后的值,范围在[0,1]
+     * @brief 禄帽脠隆鹿茅脪禄禄炉碌脛脰碌
+     * @param index 脰赂露篓脦禄脰脙
+     * @return 鹿茅脪禄禄炉潞贸碌脛脰碌,路露脦搂脭脷[0,1]
     */
     FType getNormalized(size_t index) const {
         return juce::jlimit<FType>(0, 1, m_output[index]);
@@ -83,8 +83,8 @@ public:
     // set
 
     /**
-     * @brief 设置归一化的值
-     * @param val 可以是任意值,最终输出时会被[0,1]截断
+     * @brief 脡猫脰脙鹿茅脪禄禄炉碌脛脰碌
+     * @param val 驴脡脪脭脢脟脠脦脪芒脰碌,脳卯脰脮脢盲鲁枚脢卤禄谩卤禄[0,1]陆脴露脧
     */
     void set(FType val) {
         m_smoothedValue.setTargetValue(val);
@@ -95,15 +95,15 @@ public:
     // Processing
 
     /**
-     * @brief 对缓冲区内的所有数字从半音转换到频率,
-     *        请注意这个操作无法撤回,之后你应该使用getRaw方法获取参数
+     * @brief 露脭禄潞鲁氓脟酶脛脷碌脛脣霉脫脨脢媒脳脰麓脫掳毛脪么脳陋禄禄碌陆脝碌脗脢,
+     *        脟毛脳垄脪芒脮芒赂枚虏脵脳梅脦脼路篓鲁路禄脴,脰庐潞贸脛茫脫娄赂脙脢鹿脫脙getRaw路陆路篓禄帽脠隆虏脦脢媒
     */
     inline void applySemitoneToHertz();
 
     /**
-     * @brief 对指定范围内[begin,end)的所有数字从半音转换到频率,也是无法撤回,之后你应该使用getRaw方法获取参数
-     * @param begin 开始
-     * @param end 结束
+     * @brief 露脭脰赂露篓路露脦搂脛脷[begin,end)碌脛脣霉脫脨脢媒脳脰麓脫掳毛脪么脳陋禄禄碌陆脝碌脗脢,脪虏脢脟脦脼路篓鲁路禄脴,脰庐潞贸脛茫脫娄赂脙脢鹿脫脙getRaw路陆路篓禄帽脠隆虏脦脢媒
+     * @param begin 驴陋脢录
+     * @param end 陆谩脢酶
     */
     inline void applySemitoneToHertz(size_t begin, size_t end);
     //================================================================================

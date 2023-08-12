@@ -13,20 +13,15 @@
 RPBasicSynthesizerAudioProcessorEditor::RPBasicSynthesizerAudioProcessorEditor(RPBasicSynthesizerAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p)
     , m_allModulationPanel(audioProcessor.m_synthesizer, this)
-    , m_filterPanel1(audioProcessor.m_synthesizer.m_filter)
-    , OscillorPanel(audioProcessor.m_synthesizer.m_polyOscillor) {
+    , m_sysnthesizerPanel(audioProcessor.m_synthesizer) {
     // init modulation panel
     addAndMakeVisible(m_allModulationPanel);
     m_allModulationPanel.setTopMostComponent(this);
 
-    // init oscillor panel here
-    addAndMakeVisible(OscillorPanel);
-
-    // init filter panel
-    addAndMakeVisible(m_filterPanel1);
+    addAndMakeVisible(m_sysnthesizerPanel);
 
     // init window
-    setSize(800, 600);
+    setSize(600, 480);
     setResizable(true, true);
 
     // final init
@@ -42,13 +37,11 @@ void RPBasicSynthesizerAudioProcessorEditor::paint(juce::Graphics& /*g*/) {
 }
 
 void RPBasicSynthesizerAudioProcessorEditor::resized() {
-    OscillorPanel.setBoundsRelative(0.f, 0.f, 0.3f, 0.3f);
-    m_filterPanel1.setBoundsRelative(0.f, 0.3f, 0.4f, 0.3f);
     m_allModulationPanel.setBoundsRelative(0.f, 0.6f, 1.f, 0.4f);
+    m_sysnthesizerPanel.setBoundsRelative(0.f, 0.f, 1.f, 0.6f);
 }
 
 void RPBasicSynthesizerAudioProcessorEditor::notifyShowModulationFrom(rpSynth::audio::ModulatorBase* p, rpSynth::ui::ModulationPanel*) {
+    m_sysnthesizerPanel.showModulationFrom(p);
     m_allModulationPanel.showModulationFrom(p);
-    OscillorPanel.showModulationFrom(p);
-    m_filterPanel1.showModulationFrom(p);
 }

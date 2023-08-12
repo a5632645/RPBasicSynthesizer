@@ -17,6 +17,11 @@
 #include <JuceHeader.h>
 #include "synthesizer/types.h"
 
+#define NAMESPACE_RPSYNTH rpSynth
+#define NAMESPACE_RPSYNTH_AUDIO NAMESPACE_RPSYNTH::audio
+#define NAMESPACE_RPSYNTH_UI NAMESPACE_RPSYNTH::ui
+#define NAMESPACE_RPSYNTH_AUDIO_EFFECTS NAMESPACE_RPSYNTH_AUDIO::effects
+
 namespace rpSynth {
 template<typename Type>
 static Type semitoneToHertz(Type semitone, Type frequencyOfA = static_cast<Type>(440)) noexcept {

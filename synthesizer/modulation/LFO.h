@@ -79,27 +79,44 @@ public:
 
     //===============================================================
     // implement from ModulatorBase
+    void prepareExtra(FType sr, size_t /*num*/) override {
+        m_linearSmoother.reset(sr, kCRSmoothTime);
+        m_totalNumSamples = static_cast<size_t>(sr / kControlRate);
+    }
+
     void generateData(size_t beginSamplePos, size_t endSamplePos) override {
         if (m_lineGenerator.isStateChanged()) {
             m_lineGenerator.render(m_lookUpTable.data(), kResolution);
             m_lookUpTable[kResolution] = m_lookUpTable[0];
         }
 
-        auto sr = this->getSampleRate();
-        auto& buffer = this->getOutputBuffer();
-
+        // in cr mode
         for (; beginSamplePos < endSamplePos; beginSamplePos++) {
-            auto x = m_phase.increase(m_lfoFrequency.get(beginSamplePos), sr);
-            size_t index = static_cast<size_t>(x * kResolution);
+            if (m_leftNumSamples == 0) {
+                m_leftNumSamples = m_totalNumSamples;
+                auto phaseAdd = m_lfoFrequency.get(beginSamplePos) * m_totalNumSamples / m_sampleRate;
+                m_phase.increase(phaseAdd);
+                auto index = static_cast<size_t>(m_phase.phase * kResolution);
+                m_linearSmoother.setTargetValue(m_lookUpTable[index]);
+            }
 
-            
-
-            // Where is the smooth???
-            buffer[beginSamplePos] = m_lookUpTable[index];
+            m_outputBuffer[beginSamplePos] = m_linearSmoother.getNextValue();
+            m_leftNumSamples--;
         }
+        return;
+
+        //// normal sr
+        //auto sr = this->getSampleRate();
+        //auto& buffer = this->getOutputBuffer();
+
+        //for (; beginSamplePos < endSamplePos; beginSamplePos++) {
+        //    auto x = m_phase.increase(m_lfoFrequency.get(beginSamplePos), sr);
+        //    size_t index = static_cast<size_t>(x * kResolution);
+        //    buffer[beginSamplePos] = m_lookUpTable[index];
+        //}
     }
 
-    FType onCRClock(size_t intervalSamplesInSR,size_t index) override {
+    FType onCRClock(size_t intervalSamplesInSR,size_t index) {
         FType currenFre = m_lfoFrequency.get(index);
         FType oneIncrease = currenFre / m_sampleRate;
         FType totalIncrease = static_cast<FType>(intervalSamplesInSR * oneIncrease);
@@ -110,10 +127,13 @@ public:
         return m_lookUpTable[i];
     }
 
-    void trigger(int noteOnOrOff) override {
+    void noteOn() override {
         // Only noteOn phase set 0
-        if (noteOnOrOff == 1)
-            m_phase.phase = FType{};
+        m_phase.phase = FType{};
+    }
+
+    void noteOff() override {
+
     }
 
     JUCE_NODISCARD juce::Component* createControlComponent() override {
@@ -135,6 +155,11 @@ public:
     // Parameters
     MyAudioProcessParameter m_lfoFrequency{false};
 private:
+    //CR
+    juce::SmoothedValue<FType> m_linearSmoother;
+    size_t m_totalNumSamples{};
+    size_t m_leftNumSamples{};
+
     std::array<FType, kResolution + 1> m_lookUpTable;
     Phase m_phase;
 };

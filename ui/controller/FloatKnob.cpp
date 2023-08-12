@@ -188,7 +188,7 @@ rpSynth::ui::FloatKnob::FloatKnob(audio::MyAudioProcessParameter* p)
     };
     m_sliderValueEditor.onReturnKey = [this] {
         m_sliderValueEditor.getText();
-        this->setValue(m_sliderValueEditor.getText().getFloatValue(),
+        this->setValue(getValueFromText(m_sliderValueEditor.getText()),
                        juce::sendNotificationSync);
         m_sliderValueEditor.setVisible(false);
     };
@@ -217,7 +217,7 @@ rpSynth::ui::FloatKnob::FloatKnob(audio::MyAudioProcessParameter* p)
         repaint();
     });
     m_myPopUpMenu.addItem("edit param value", [this] {
-        m_sliderValueEditor.setText(juce::String(getValue()), false);
+        m_sliderValueEditor.setText(getTextFromValue(getValue()), false);
         m_sliderValueEditor.setVisible(true);
     });
     m_myPopUpMenu.addItem("edit modulation amount", [this] {

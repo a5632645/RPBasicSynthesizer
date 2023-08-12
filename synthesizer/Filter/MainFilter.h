@@ -49,7 +49,7 @@ public:
     //=========================================================================
     void changeFilter(const juce::String& filterType);
     void addAudioInput(AudioProcessorBase* pProcessor, StereoBuffer* pInput);
-    StereoBuffer& getFilterOutput() { return m_processorOutputBuffer; }
+    StereoBuffer* getFilterOutput() { return &m_processorOutputBuffer; }
     juce::StringArray getAllFilterNames() const;
     juce::StringRef getCurrentFilterName() const;
     const InputRouterSet& getInputSet(size_t index) const { return m_inputRouter[index]; }

@@ -18,6 +18,12 @@
 #include "synthesizer/AudioProcessorBase.h"
 
 namespace rpSynth::audio {
+//================================================================================
+// CR³£Á¿
+//================================================================================
+static constexpr double kCRSmoothTime = 0.05;// 50ms
+static constexpr size_t kControlRate = 400;// 400hz
+
 class ModulatorBase : public AudioProcessorBase {
 public:
     using AudioProcessorBase::AudioProcessorBase;
@@ -25,8 +31,9 @@ public:
     //=========================================================================
     // interfaces
     virtual void generateData(size_t beginSamplePos, size_t endSamplePos) = 0;
-    virtual FType onCRClock(size_t intervalSamplesInSR, size_t index) = 0;
-    virtual void trigger(int noteOnOrOff) = 0;
+    virtual void prepareExtra(FType sampleRate, size_t numSamples) = 0;
+    virtual void noteOn() = 0;
+    virtual void noteOff() = 0;
     JUCE_NODISCARD virtual juce::Component* createControlComponent() = 0;
     //=========================================================================
 
@@ -35,23 +42,12 @@ public:
     void prepare(FType sampleRate, size_t numSamples) override {
         m_sampleRate = sampleRate;
         m_outputBuffer.resize(numSamples, FType{});
+        prepareExtra(sampleRate, numSamples);
     }
 
     void process(size_t beginSamplePos, size_t endSamplePos) override {
         // first generate all data
-        // this->generateData(beginSamplePos, endSamplePos);
-        for (size_t i = beginSamplePos; i < endSamplePos; i++) {
-            // on control rate clock get a sample
-            if (m_numShengYuSamples == 0) {
-                FType crValue = onCRClock(m_totalSampleSkip, i);
-                m_linearSmoother.setTargetValue(crValue);
-                m_numShengYuSamples = m_totalSampleSkip;
-            }
-
-            // do smooth here
-            m_outputBuffer[i] = m_linearSmoother.getNextValue();
-            m_numShengYuSamples--;
-        }
+        this->generateData(beginSamplePos, endSamplePos);
 
         // then add data to parameter buffer
         for (ModulationSettings* set : m_parametersLinked) {
@@ -71,17 +67,6 @@ public:
                 }
             }
         }
-    }
-
-    //=========================================================================
-    void setControlRate(FType cr) {
-        m_controlRate = cr;
-        m_totalSampleSkip = static_cast<size_t>(m_sampleRate / m_controlRate);
-        m_numShengYuSamples = 0;
-    }
-
-    void setSmoothTime(FType timeInSeconds) {
-        m_linearSmoother.reset(m_sampleRate, timeInSeconds);
     }
 
     bool hasNoModulationTargets() const {
@@ -198,14 +183,8 @@ public:
     }
 
 protected:
-    // SR and CR
+    // SR
     FType m_sampleRate{};
-    FType m_controlRate{};
-    size_t m_totalSampleSkip{};
-    size_t m_numShengYuSamples{};
-
-    // A linear smoother
-    juce::SmoothedValue<FType> m_linearSmoother;
 
     // modulations and output
     juce::OwnedArray<ModulationSettings> m_parametersLinked;

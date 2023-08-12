@@ -19,6 +19,7 @@
 #include "modulation/ModulationManager.h"
 #include "Oscillor/PolyOscillor.h"
 #include "Filter/MainFilter.h"
+#include "Effects/OrderableEffectsChain.h"
 
 namespace rpSynth::audio {
 class PolyOscillor;
@@ -62,6 +63,7 @@ public:
     MainFilter m_filter{"FILTER1"};
 
     // fx chain
+    OrderableEffectsChain m_fxChain{"FXS"};
 
     // modulation
     ModulationManager m_LFOModulationManager{"LFOMODULATORS"};

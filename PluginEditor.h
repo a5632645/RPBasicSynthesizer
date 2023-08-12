@@ -10,9 +10,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "ui/oscillor/OscillorPanel.h"
-#include "ui/filter/FilterPanel.h"
 #include "ui/modulation/FinalModulationPanel.h"
+#include "ui/SynthesizerPanel.h"
 
 //==============================================================================
 /**
@@ -36,7 +35,7 @@ private:
     RPBasicSynthesizerAudioProcessor& audioProcessor;
 
     rpSynth::ui::FinalModulationPanel m_allModulationPanel;
-    rpSynth::ui::FilterPanel m_filterPanel1;
-    rpSynth::ui::OscillorPanel OscillorPanel;
+    rpSynth::ui::SynthesizerPanel m_sysnthesizerPanel;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RPBasicSynthesizerAudioProcessorEditor)
 };

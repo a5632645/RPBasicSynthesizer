@@ -20,6 +20,7 @@ void BasicSynthesizer::prepare(FType sampleRate,
     m_LFOModulationManager.prepare(sampleRate, numSamplesPerBlock);
     m_EnvModulationManager.prepare(sampleRate, numSamplesPerBlock);
     m_filter.prepare(sampleRate, numSamplesPerBlock);
+    m_fxChain.prepare(sampleRate, numSamplesPerBlock);
 }
 
 void BasicSynthesizer::addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) {
@@ -27,6 +28,7 @@ void BasicSynthesizer::addParameterToLayout(juce::AudioProcessorValueTreeState::
     m_EnvModulationManager.addParameterToLayout(layout);
     m_polyOscillor.addParameterToLayout(layout);
     m_filter.addParameterToLayout(layout);
+    m_fxChain.addParameterToLayout(layout);
 }
 
 void BasicSynthesizer::updateParameters(size_t numSamples) {
@@ -34,6 +36,7 @@ void BasicSynthesizer::updateParameters(size_t numSamples) {
     m_EnvModulationManager.updateParameters(numSamples);
     m_polyOscillor.updateParameters(numSamples);
     m_filter.updateParameters(numSamples);
+    m_fxChain.updateParameters(numSamples);
 }
 
 void BasicSynthesizer::prepareParameters(FType sampleRate, size_t numSamples) {
@@ -41,6 +44,7 @@ void BasicSynthesizer::prepareParameters(FType sampleRate, size_t numSamples) {
     m_LFOModulationManager.prepareParameters(sampleRate, numSamples);
     m_EnvModulationManager.prepareParameters(sampleRate, numSamples);
     m_filter.prepareParameters(sampleRate, numSamples);
+    m_fxChain.prepareParameters(sampleRate, numSamples);
 }
 
 void BasicSynthesizer::saveExtraState(juce::XmlElement& xml) {
@@ -48,6 +52,7 @@ void BasicSynthesizer::saveExtraState(juce::XmlElement& xml) {
     m_EnvModulationManager.saveExtraState(xml);
     m_polyOscillor.saveExtraState(xml);
     m_filter.saveExtraState(xml);
+    m_fxChain.saveExtraState(xml);
 }
 
 void BasicSynthesizer::loadExtraState(juce::XmlElement& xml, juce::AudioProcessorValueTreeState& apvts) {
@@ -55,6 +60,7 @@ void BasicSynthesizer::loadExtraState(juce::XmlElement& xml, juce::AudioProcesso
     m_EnvModulationManager.loadExtraState(xml, apvts);
     m_polyOscillor.loadExtraState(xml, apvts);
     m_filter.loadExtraState(xml, apvts);
+    m_fxChain.loadExtraState(xml, apvts);
 }
 //=============================================================================
 
@@ -84,6 +90,9 @@ BasicSynthesizer::BasicSynthesizer(const juce::String& ID)
 
     // Filter init
     m_filter.addAudioInput(&m_polyOscillor, m_polyOscillor.getOutputBuffer());
+
+    // fx chain init
+    m_fxChain.setAudioInput(m_filter.getFilterOutput());
 }
 
 void BasicSynthesizer::processBlock(juce::MidiBuffer& midiBuffer,
@@ -112,23 +121,24 @@ void BasicSynthesizer::processBlock(juce::MidiBuffer& midiBuffer,
 
     // Directly let filter and effects chain work
     m_filter.process(0, totalNumSamples);
-    auto& out = m_filter.getFilterOutput();
+    m_fxChain.process(0, totalNumSamples);
 
     // Copy to output
-    audioBuffer.copyFrom(0, 0, out.left.data(), (int)totalNumSamples);
-    audioBuffer.copyFrom(1, 0, out.right.data(), (int)totalNumSamples);
+    auto* out = m_fxChain.getChainOutput();
+    audioBuffer.copyFrom(0, 0, out->left.data(), (int)totalNumSamples);
+    audioBuffer.copyFrom(1, 0, out->right.data(), (int)totalNumSamples);
 }
 
 void BasicSynthesizer::handleMidiMessage(const juce::MidiMessage& message,
-                                         size_t lastPosition, size_t position) {
+                                         size_t /*lastPosition*/, size_t /*position*/) {
     // note on,note off event will let Oscillor and modulation work
     if (message.isNoteOn()) {
-        m_LFOModulationManager.addTrigger(1);
-        m_EnvModulationManager.addTrigger(1);
+        m_LFOModulationManager.noteOn();
+        m_EnvModulationManager.noteOn();
         m_polyOscillor.noteOn(message.getChannel(), message.getNoteNumber(), message.getFloatVelocity());
     } else if (message.isNoteOff()) {
-        m_LFOModulationManager.addTrigger(0);
-        m_EnvModulationManager.addTrigger(0);
+        m_LFOModulationManager.noteOff();
+        m_EnvModulationManager.noteOff();
         m_polyOscillor.noteOff(message.getChannel(), message.getNoteNumber(), message.getFloatVelocity());
     }
 }

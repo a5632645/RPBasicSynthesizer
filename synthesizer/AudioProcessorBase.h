@@ -37,4 +37,17 @@ private:
     juce::String m_audioProcessorID;
     
 };
+
+//================================================================================
+// Ò»¸öÓÃÓÚ½â¾öPitchµ½HertzÒÔ¼°·´ÏòµÄFloatAttribute
+//================================================================================
+inline static const juce::AudioParameterFloatAttributes g_PitchHertzFloatParameterAttribute
+= [] {
+    return juce::AudioParameterFloatAttributes()
+        .withStringFromValueFunction([](float v, int) {
+        return juce::String(semitoneToHertz(v));
+    }).withValueFromStringFunction([](const juce::String& s) {
+        return hertzToSemitone(juce::jmax(s.getFloatValue(), 0.001f));
+    });
+}();
 }

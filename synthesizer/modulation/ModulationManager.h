@@ -19,9 +19,6 @@
 namespace rpSynth::audio {
 class ModulationManager : public AudioProcessorBase {
 public:
-    static constexpr FType kSmoothTimeInSeconds = 0.005f;// 50ms
-    static constexpr FType kControlRate = 400;// 400hz
-
     using AudioProcessorBase::AudioProcessorBase;
     //=========================================================================
     // Implement from AudioProcessorBase
@@ -40,8 +37,6 @@ public:
     void prepare(FType sampleRate, size_t numSamples) override {
         for (auto& m : m_modulators) {
             m->prepare(sampleRate, numSamples);
-            m->setControlRate(kControlRate);
-            m->setSmoothTime(kSmoothTimeInSeconds);
         }
     }
 
@@ -58,9 +53,15 @@ public:
     }
 
     //=========================================================================
-    void addTrigger(int noteOnOrOff) {
+    void noteOn() {
         for (auto& m : m_modulators) {
-            m->trigger(noteOnOrOff);
+            m->noteOn();
+        }
+    }
+
+    void noteOff() {
+        for (auto& m : m_modulators) {
+            m->noteOff();
         }
     }
 

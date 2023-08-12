@@ -32,7 +32,7 @@ public:
     void doLayout(ui::FilterKnobsPanel&) override;
     //=========================================================================
 private:
-    FType m_oneDivSampleRate;
+    FType m_oneDivNyquistRate;
     Filter LF;
     Filter RF;
 private:

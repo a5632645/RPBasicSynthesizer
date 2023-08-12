@@ -18,10 +18,14 @@ public:
     ~EnvelopDraw() override = default;
 
     EnvelopDraw(rpSynth::audio::Envelop& e) :envelop(e) {
-        startTimerHz(1);
+        startTimerHz(10);
     }
 
     void timerCallback() {
+        if (envelop.hasNoModulationTargets()) {
+            return;
+        }
+
         repaint();
     }
 
@@ -96,6 +100,10 @@ public:
             return;
         }
 
+        repaint();
+    }
+
+    void paint(juce::Graphics& g) {
         float width = static_cast<float>(getWidth());
 
         float lAttack = envelop.m_attackInMillSeconds.getNormalized(0);
@@ -134,20 +142,10 @@ public:
                 break;
         }
 
-        if (std::abs(m_lastPointerXPosition - newPosition) < 5) {
-            return;
-        }
-
-        m_lastPointerXPosition = newPosition;
-        repaint();
-    }
-
-    void paint(juce::Graphics& g) {
         g.setColour(juce::Colours::white);
-        g.drawVerticalLine(m_lastPointerXPosition, 0.f, static_cast<float>(getHeight()));
+        g.drawVerticalLine(newPosition, 0.f, static_cast<float>(getHeight()));
     }
 private:
-    int m_lastPointerXPosition{};
     audio::Envelop& envelop;
 };
 };

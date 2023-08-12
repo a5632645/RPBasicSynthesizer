@@ -40,6 +40,6 @@ template<class T>
 struct NonNullPtr {
     T* ptr;
 
-    explicit NonNullPtr(T* p) : ptr(p) { jassert(p != nullptr); }
+    NonNullPtr(T* p) : ptr(p) { jassert(p != nullptr); }
 };
 };

@@ -18,10 +18,6 @@
 
 static const juce::String kFilterNameAttribute = "filterName";
 
-static juce::String _stToHzString(float st, int /*maxStringLen*/) {
-    return juce::String(rpSynth::semitoneToHertz(st), 1);
-}
-
 namespace rpSynth::audio {
 MainFilter::MainFilter(const juce::String& ID)
     :AudioProcessorBase(ID) {
@@ -50,8 +46,7 @@ void MainFilter::addParameterToLayout(juce::AudioProcessorValueTreeState::Parame
                                                                  "cutoff",
                                                                  juce::NormalisableRange<float>(kStOf20hz, kStOf20000hz, 0.01f),
                                                                  hertzToSemitone(440.f),
-                                                                 juce::AudioParameterFloatAttributes().withStringFromValueFunction(_stToHzString)
-    ),
+                                                                 g_PitchHertzFloatParameterAttribute),
                std::make_unique<MyHostedAudioProcessorParameter>(&m_allFilterParameters->resonance,
                                                                  combineWithID("resonance"),
                                                                  "resonance",
