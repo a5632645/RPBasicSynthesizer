@@ -13,13 +13,16 @@
 
 namespace rpSynth::audio {
 class ModulatorBase;
-class MyAudioProcessParameter;
+//class MyAudioProcessParameter;
+class MyAudioParameter;
 }
 
 namespace rpSynth::ui {
 class ModulableUIBase {
 public:
-    ModulableUIBase(audio::MyAudioProcessParameter* param)
+    //ModulableUIBase(audio::MyAudioProcessParameter* param)
+    ModulableUIBase(audio::MyAudioParameter* param)
+
         :m_audioProcessorParameter(param) {
         // A ui object can not own a nullptr
         // also ui is first deleted before processor
@@ -29,12 +32,14 @@ public:
 
     virtual ~ModulableUIBase() = default;
 
-    audio::MyAudioProcessParameter* getMyAudioProcessorParameter() const {
+    //audio::MyAudioProcessParameter* getMyAudioProcessorParameter() const {
+    audio::MyAudioParameter* getMyAudioProcessorParameter() const {
         return m_audioProcessorParameter;
     }
 
     virtual void showModulationFrom(audio::ModulatorBase*) = 0;
 private:
-    audio::MyAudioProcessParameter* m_audioProcessorParameter;
+    //audio::MyAudioProcessParameter* m_audioProcessorParameter;
+    audio::MyAudioParameter* m_audioProcessorParameter;
 };
 }

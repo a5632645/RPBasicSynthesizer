@@ -136,7 +136,8 @@ void KnobWithModulation::drawRotarySlider(juce::Graphics& g,
                4.f);
 }
 
-rpSynth::ui::FloatKnob::FloatKnob(audio::MyAudioProcessParameter* p)
+//rpSynth::ui::FloatKnob::FloatKnob(audio::MyAudioProcessParameter* p)
+rpSynth::ui::FloatKnob::FloatKnob(audio::MyAudioParameter* p)
     :ModulableUIBase(p)
     , m_attachment(*(p->getHostParameter()), *this) {
     setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);

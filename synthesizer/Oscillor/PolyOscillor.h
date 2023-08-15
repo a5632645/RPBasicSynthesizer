@@ -13,7 +13,7 @@
 #include <array>
 #include "../../concepts.h"
 #include "SingeNoteOscillor.h"
-#include "../WrapParameter.h"
+#include "synthesizer/NewWrapParameter.h"
 #include "../AudioProcessorBase.h"
 
 namespace rpSynth::audio {
@@ -31,12 +31,13 @@ public:
 
     // implement from AudioProcessorBase
     void addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) override;
-    void updateParameters(size_t numSamples) override;
+    //void updateParameters(size_t numSamples) override;
     void prepareParameters(FType sampleRate, size_t numSamples) override;
     void prepare(FType sampleRate, size_t numSamlpes) override;
     void process(size_t beginSamplePos, size_t endSamplePos) override;
     void saveExtraState(juce::XmlElement& /*xml*/) override {};
     void loadExtraState(juce::XmlElement& /*xml*/, juce::AudioProcessorValueTreeState& /*apvts*/) override {};
+    void onCRClock(size_t) override;
 private:
     friend class SingeNoteOscillor;
 
@@ -48,7 +49,7 @@ private:
     StereoBuffer m_outputBuffer;
 public:
     // Parameters
-    MyAudioProcessParameter m_semitone;
-    MyAudioProcessParameter m_volumeLevel;
+    MyAudioParameter m_semitone;
+    MyAudioParameter m_volumeLevel;
 };
 }

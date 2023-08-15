@@ -11,7 +11,8 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "synthesizer/WrapParameter.h"
+//#include "synthesizer/WrapParameter.h"
+#include "synthesizer/NewWrapParameter.h"
 //#include "synthesizer/modulation/ModulationSetting.h"
 #include "ModulableUIBase.h"
 
@@ -24,7 +25,8 @@ namespace rpSynth::ui {
 class FloatKnob : public juce::Slider
     , public ModulableUIBase {
 public:
-    FloatKnob(audio::MyAudioProcessParameter*);
+    //FloatKnob(audio::MyAudioProcessParameter*);
+    FloatKnob(audio::MyAudioParameter*);
     ~FloatKnob() override;
 
     void resized() override;

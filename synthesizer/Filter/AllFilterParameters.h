@@ -9,17 +9,28 @@
 */
 
 #pragma once
-#include "synthesizer/WrapParameter.h"
+#include "synthesizer/NewWrapParameter.h"
 
 namespace rpSynth::audio::filters {
 /**
- * @brief ÕâÊÇËùÓĞÂË²¨Æ÷µÄ²ÎÊı²¢¼¯
- *        ËüÓ¦¸Ã±»ËùÓĞÂË²¨Æ÷ÊµÏÖ¹²Ïí
+ * @brief è¿™æ˜¯æ‰€æœ‰æ»¤æ³¢å™¨çš„å‚æ•°å¹¶é›†
+ *        å®ƒåº”è¯¥è¢«æ‰€æœ‰æ»¤æ³¢å™¨å®ç°å…±äº«
 */
 struct AllFilterParameters {
-    MyAudioProcessParameter cutoff;
-    MyAudioProcessParameter resonance;
-    MyAudioProcessParameter limitVolume;
-    MyAudioProcessParameter limitK;
+    MyAudioParameter cutoff;
+    MyAudioParameter resonance;
+    MyAudioParameter phase;
+
+    void onCRClock() {
+        cutoff.onCRClock();
+        resonance.onCRClock();
+        phase.onCRClock();
+    }
+
+    void prepare(FType sampleRate) {
+        cutoff.prepare(sampleRate);
+        resonance.prepare(sampleRate);
+        phase.prepare(sampleRate);
+    }
 };
 };

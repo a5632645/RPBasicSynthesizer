@@ -35,11 +35,11 @@ public:
         float width = static_cast<float>(getWidth());
         float height = static_cast<float>(getHeight());
 
-        float lAttack = envelop.m_attackInMillSeconds.getNormalized(0);
-        float lHold = envelop.m_holdInMillSeconds.getNormalized(0);
-        float lDecay = envelop.m_decayInMillSeconds.getNormalized(0);
+        float lAttack = envelop.m_attackInMillSeconds.getNormalizedTargetValue();
+        float lHold = envelop.m_holdInMillSeconds.getNormalizedTargetValue();
+        float lDecay = envelop.m_decayInMillSeconds.getNormalizedTargetValue();
         float lSustain = 0.05f;
-        float lRelease = envelop.m_releaseInMillSeconds.getNormalized(0);
+        float lRelease = envelop.m_releaseInMillSeconds.getNormalizedTargetValue();
         float totalLength = lAttack + lHold + lDecay + lSustain + lRelease;
 
         float xInit = 0.f;
@@ -48,7 +48,7 @@ public:
         float xDecay = xHold + lDecay * width / totalLength;
         float xSustain = xDecay + lSustain * width / totalLength;
         float xRelease = xSustain + lRelease * width / totalLength;
-        float ySustain = height - envelop.m_sustainLevelInDecibels.getNormalized(0) * height;
+        float ySustain = height - envelop.m_sustainLevelInDecibels.getNormalizedTargetValue() * height;
 
         // 6 points
         juce::Point<float> initPoint{0.f,height};
@@ -106,11 +106,11 @@ public:
     void paint(juce::Graphics& g) {
         float width = static_cast<float>(getWidth());
 
-        float lAttack = envelop.m_attackInMillSeconds.getNormalized(0);
-        float lHold = envelop.m_holdInMillSeconds.getNormalized(0);
-        float lDecay = envelop.m_decayInMillSeconds.getNormalized(0);
+        float lAttack = envelop.m_attackInMillSeconds.getNormalizedTargetValue();
+        float lHold = envelop.m_holdInMillSeconds.getNormalizedTargetValue();
+        float lDecay = envelop.m_decayInMillSeconds.getNormalizedTargetValue();
         float lSustain = 0.05f;
-        float lRelease = envelop.m_releaseInMillSeconds.getNormalized(0);
+        float lRelease = envelop.m_releaseInMillSeconds.getNormalizedTargetValue();
         float totalLength = lAttack + lHold + lDecay + lSustain + lRelease;
 
         float xInit = 0.f;
@@ -120,25 +120,25 @@ public:
         float xSustain = xDecay + lSustain * width / totalLength;
         float xRelease = xSustain + lRelease * width / totalLength;
 
-        auto currentEnvelopPositon = envelop.getCurrentEnvelopState();
+        auto currentEnvelopPosition = envelop.getCurrentEnvelopState();
         int newPosition{};
-        switch (currentEnvelopPositon.first) {
+        switch (currentEnvelopPosition.first) {
             case audio::Envelop::EnvelopState::Init:
                 break;
             case audio::Envelop::EnvelopState::Attack:
-                newPosition = static_cast<int>(xInit + (xAttack - xInit) * currentEnvelopPositon.second);
+                newPosition = static_cast<int>(xInit + (xAttack - xInit) * currentEnvelopPosition.second);
                 break;
             case audio::Envelop::EnvelopState::Hold:
-                newPosition = static_cast<int>(xAttack + (xHold - xAttack) * currentEnvelopPositon.second);
+                newPosition = static_cast<int>(xAttack + (xHold - xAttack) * currentEnvelopPosition.second);
                 break;
             case audio::Envelop::EnvelopState::Decay:
-                newPosition = static_cast<int>(xHold + (xDecay - xHold) * currentEnvelopPositon.second);
+                newPosition = static_cast<int>(xHold + (xDecay - xHold) * currentEnvelopPosition.second);
                 break;
             case audio::Envelop::EnvelopState::Sustain:
-                newPosition = static_cast<int>(xDecay + (xSustain - xDecay) * currentEnvelopPositon.second);
+                newPosition = static_cast<int>(xDecay + (xSustain - xDecay) * currentEnvelopPosition.second);
                 break;
             case audio::Envelop::EnvelopState::Release:
-                newPosition = static_cast<int>(xSustain + (xRelease - xSustain) * currentEnvelopPositon.second);
+                newPosition = static_cast<int>(xSustain + (xRelease - xSustain) * currentEnvelopPosition.second);
                 break;
         }
 

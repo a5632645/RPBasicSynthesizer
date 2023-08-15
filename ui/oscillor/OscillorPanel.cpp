@@ -28,6 +28,8 @@ void OscillorPanel::resized() {
 }
 
 void OscillorPanel::paint(juce::Graphics& g) {
+    g.setColour(juce::Colours::white);
+    g.drawRect(getLocalBounds());
 }
 
 void OscillorPanel::showModulationFrom(audio::ModulatorBase* p) {

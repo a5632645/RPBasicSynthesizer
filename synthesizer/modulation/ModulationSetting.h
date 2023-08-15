@@ -10,19 +10,21 @@
 
 #pragma once
 
-#include "../../concepts.h"
+#include "concepts.h"
 
 namespace rpSynth::audio {
 class ModulatorBase;
-class MyAudioProcessParameter;
+//class MyAudioProcessParameter;
+class MyAudioParameter;
 
-struct ModulationSettings {
+class ModulationSettings {
+public:
     static constexpr bool kBypass = false;
     static constexpr bool kBipolar = false;
     static constexpr FType kAmount = static_cast<FType>(0.2);
 
     ModulationSettings() {}
-    ModulationSettings(MyAudioProcessParameter* pTarget, ModulatorBase* pModulator)
+    ModulationSettings(MyAudioParameter* pTarget, ModulatorBase* pModulator)
         : target(pTarget)
         , modulator(pModulator) {
     }
@@ -42,7 +44,8 @@ struct ModulationSettings {
     bool bypass = kBypass;
     bool bipolar = kBipolar;
     FType amount = kAmount;
-    MyAudioProcessParameter* target = nullptr;
+    MyAudioParameter* target = nullptr;
     ModulatorBase* modulator = nullptr;
+    MyAudioParameter* targetNew = nullptr;
 };
 }

@@ -9,12 +9,12 @@
 */
 
 #include "PolyOscillor.h"
+#include "synthesizer/NewWrapParameter.h"
 
 namespace rpSynth::audio {
 void PolyOscillor::prepare(FType sampleRate, size_t numSamples) {
     // Output buffer init here
-    m_outputBuffer.left.resize(numSamples, FType{});
-    m_outputBuffer.right.resize(numSamples, FType{});
+    m_outputBuffer.resize(numSamples);
 
     // Oscillor init here
     for (SingeNoteOscillor& osc : m_SingleNoteOscillors) {
@@ -24,9 +24,6 @@ void PolyOscillor::prepare(FType sampleRate, size_t numSamples) {
 }
 
 void PolyOscillor::process(size_t beginSamplePos, size_t endSamplePos) {
-    // clear
-    clearBuffer();
-
     // adding...
     for (SingeNoteOscillor& osc : m_SingleNoteOscillors) {
         osc.addToBlock(m_outputBuffer, beginSamplePos, endSamplePos);
@@ -34,39 +31,43 @@ void PolyOscillor::process(size_t beginSamplePos, size_t endSamplePos) {
 
     // Apply volume
     for (; beginSamplePos < endSamplePos; beginSamplePos++) {
-        auto level = juce::Decibels::decibelsToGain(m_volumeLevel.get(beginSamplePos),
+        auto level = juce::Decibels::decibelsToGain(m_volumeLevel.getNextValue(),
                                                     static_cast<FType>(-36));
-        m_outputBuffer.left[beginSamplePos] *= level;
-        m_outputBuffer.right[beginSamplePos] *= level;
+        m_outputBuffer.buffer[beginSamplePos].left *= level;
+        m_outputBuffer.buffer[beginSamplePos].right *= level;
     }
 }
 
+void PolyOscillor::onCRClock(size_t) {
+    m_semitone.onCRClock();
+    m_volumeLevel.onCRClock();
+}
+
 void PolyOscillor::clearBuffer() {
-    std::ranges::fill(m_outputBuffer.left, FType{});
-    std::ranges::fill(m_outputBuffer.right, FType{});
+    m_outputBuffer.clear();
 }
 
 void PolyOscillor::addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) {
-    layout.add(std::make_unique<MyHostedAudioProcessorParameter>(&m_semitone,
-                                                                 combineWithID("semitone"),
-                                                                 "semitone",
-                                                                 juce::NormalisableRange<float>(-48.f, 48.f, 0.1f),
-                                                                 0.f));
-    layout.add(std::make_unique<MyHostedAudioProcessorParameter>(&m_volumeLevel,
-                                                                 combineWithID("volume"),
-                                                                 "volume",
-                                                                 juce::NormalisableRange<float>(-36.f, 0.f, 0.1f),
-                                                                 -12.f));
+    layout.add(std::make_unique<MyHostParameter>(m_semitone,
+                                                 combineWithID("semitone"),
+                                                 "semitone",
+                                                 juce::NormalisableRange<float>(-48.f, 48.f, 0.1f),
+                                                 0.f));
+    layout.add(std::make_unique<MyHostParameter>(m_volumeLevel,
+                                                 combineWithID("volume"),
+                                                 "volume",
+                                                 juce::NormalisableRange<float>(-36.f, 0.f, 0.1f),
+                                                 -12.f));
 }
 
-void PolyOscillor::updateParameters(size_t numSamples) {
-    m_semitone.updateParameter(numSamples);
-    m_volumeLevel.updateParameter(numSamples);
-}
+//void PolyOscillor::updateParameters(size_t numSamples) {
+//    m_semitone.updateParameter(numSamples);
+//    m_volumeLevel.updateParameter(numSamples);
+//}
 
 void PolyOscillor::prepareParameters(FType sampleRate, size_t numSamples) {
-    m_semitone.prepare(sampleRate, numSamples);
-    m_volumeLevel.prepare(sampleRate, numSamples);
+    m_semitone.prepare(sampleRate);
+    m_volumeLevel.prepare(sampleRate);
 }
 
 void PolyOscillor::noteOn(int channel, int noteNumber, float velocity) {

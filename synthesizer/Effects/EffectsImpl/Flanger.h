@@ -11,12 +11,11 @@
 #pragma once
 #include <JuceHeader.h>
 #include "synthesizer/Effects/EffectProcessorBase.h"
-#include "synthesizer/WrapParameter.h"
 
 namespace rpSynth::audio::effects {
 class FlangerPanel;
-struct FlangerParameters;
 class FlangerImpl;
+struct FlangerParameters;
 
 class Flanger : public EffectProcessorBase {
 public:
@@ -29,7 +28,7 @@ public:
     //================================================================================
     void addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) override;
 
-    void updateParameters(size_t numSamples) override;
+    //void updateParameters(size_t numSamples) override;
 
     void prepareParameters(FType sampleRate, size_t numSamples) override;
 
@@ -43,9 +42,11 @@ public:
 
     std::unique_ptr<ui::ContainModulableComponent> createEffectPanel() override;
 
+    void onCRClock(size_t n) override;
+
 private:
     //================================================================================
-    // ≤Œ ˝
+    // ÂèÇÊï∞
     //================================================================================
     friend class FlangerPanel;
     std::unique_ptr<FlangerParameters> m_allFlangerParameters;

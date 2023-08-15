@@ -19,6 +19,6 @@ rpSynth::audio::effects::EffectProcessorBase::EffectProcessorBase(OrderableEffec
 
 void rpSynth::audio::effects::EffectProcessorBase::process(size_t beginSamplePos, size_t endSamplePos){ 
     if (notBypass->get()) {
-        processBlock(*chain.getChainOutput(), beginSamplePos, endSamplePos);
+        processBlock(chain.getChainBuffer(), beginSamplePos, endSamplePos);
     }
 }

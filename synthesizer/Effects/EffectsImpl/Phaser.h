@@ -29,7 +29,7 @@ public:
     //================================================================================
     void addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) override;
 
-    void updateParameters(size_t numSamples) override;
+    //void updateParameters(size_t numSamples) override;
 
     void prepareParameters(FType sampleRate, size_t numSamples) override;
 
@@ -43,9 +43,11 @@ public:
 
     std::unique_ptr<ui::ContainModulableComponent> createEffectPanel() override;
 
+    void onCRClock(size_t) override;
+
 private:
     //================================================================================
-    // ≤Œ ˝
+    // ÂèÇÊï∞
     //================================================================================
     friend class PhaserPanel;
     std::unique_ptr<PhaserParameters> m_allFlangerParameters;

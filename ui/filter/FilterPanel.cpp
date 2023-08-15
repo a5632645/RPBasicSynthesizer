@@ -18,13 +18,11 @@ FilterKnobsPanel::FilterKnobsPanel(audio::MainFilter& f)
     : m_filter(f)
     , m_cutoff(&f.m_allFilterParameters->cutoff)
     , m_resonance(&f.m_allFilterParameters->resonance)
-    , m_limitVolume(&f.m_allFilterParameters->limitVolume)
-    , m_limitK(&f.m_allFilterParameters->limitK) {
+    , m_phase(&f.m_allFilterParameters->phase) {
     // Don not forge to add knob
     addAndMakeVisible(m_cutoff);
     addAndMakeVisible(m_resonance);
-    addAndMakeVisible(m_limitVolume);
-    addAndMakeVisible(m_limitK);
+    addAndMakeVisible(m_phase);
 
     // emmmm
     doLayout(m_filter.getCurrentFilterName());
@@ -33,15 +31,13 @@ FilterKnobsPanel::FilterKnobsPanel(audio::MainFilter& f)
 void FilterKnobsPanel::showModulationFrom(audio::ModulatorBase* p) {
     m_cutoff.showModulationFrom(p);
     m_resonance.showModulationFrom(p);
-    m_limitVolume.showModulationFrom(p);
-    m_limitK.showModulationFrom(p);
+    m_phase.showModulationFrom(p);
 }
 
 void FilterKnobsPanel::setAllKnobInvisitable() {
     m_cutoff.setVisible(false);
     m_resonance.setVisible(false);
-    m_limitVolume.setVisible(false);
-    m_limitK.setVisible(false);
+    m_phase.setVisible(false);
 }
 
 //=========================================================================

@@ -12,9 +12,9 @@
 #include "FilterImplBase.h"
 #include "AllFilterParameters.h"
 
-#include "Filters/LowPass.h"
-#include "Filters/HighPass.h"
 #include "Filters/Analog/MoogLadderFilter.h"
+#include "Filters/Digital/CombFilterPos.h"
+#include "Filters/Digital/CombFilterNeg.h"
 
 static const juce::String kFilterNameAttribute = "filterName";
 
@@ -24,13 +24,13 @@ MainFilter::MainFilter(const juce::String& ID)
     m_allFilterParameters = std::make_unique<filters::AllFilterParameters>();
     // Add all type of impl filter into hash map
     using namespace filters;
-    m_allFilters.set(LowPass::kName, std::make_shared<LowPass>(*m_allFilterParameters));
-    m_allFilters.set(HighPass::kName, std::make_shared<HighPass>(*m_allFilterParameters));
     m_allFilters.set(analog::MoogLadderFilter::kName, std::make_shared<analog::MoogLadderFilter>(*m_allFilterParameters));
+    m_allFilters.set(digital::CombPos::kName, std::make_shared<digital::CombPos>(*m_allFilterParameters));
+    m_allFilters.set(digital::CombNeg::kName, std::make_shared<digital::CombNeg>(*m_allFilterParameters));
 
     // Set the default Filter impl
-    m_newFilterName = LowPass::kName;
-    m_currentFilterImpl = m_allFilters.getReference(LowPass::kName);
+    m_newFilterName = analog::MoogLadderFilter::kName;
+    m_currentFilterImpl = m_allFilters.getReference(m_newFilterName);
 }
 
 MainFilter::~MainFilter() {
@@ -41,27 +41,22 @@ MainFilter::~MainFilter() {
 // Notice: Please add parameter operator here when adding parameter
 void MainFilter::addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) {
     // common control parameters
-    layout.add(std::make_unique<MyHostedAudioProcessorParameter>(&m_allFilterParameters->cutoff,
-                                                                 combineWithID("cutoff"),
-                                                                 "cutoff",
-                                                                 juce::NormalisableRange<float>(kStOf20hz, kStOf20000hz, 0.01f),
-                                                                 hertzToSemitone(440.f),
-                                                                 g_PitchHertzFloatParameterAttribute),
-               std::make_unique<MyHostedAudioProcessorParameter>(&m_allFilterParameters->resonance,
-                                                                 combineWithID("resonance"),
-                                                                 "resonance",
-                                                                 juce::NormalisableRange <float>(0.f, 1.f, 0.01f),
-                                                                 0.f),
-               std::make_unique<MyHostedAudioProcessorParameter>(&m_allFilterParameters->limitVolume,
-                                                                 combineWithID("LimitVolume"),
-                                                                 "LimitVolume",
-                                                                 juce::NormalisableRange<float>(0.f, 1.f, 0.01f),
-                                                                 1.f),
-               std::make_unique<MyHostedAudioProcessorParameter>(&m_allFilterParameters->limitK,
-                                                                 combineWithID("LimitK"),
-                                                                 "LimitK",
-                                                                 juce::NormalisableRange<float>(0.f, 0.5f, 0.001f),
-                                                                 0.125f)
+    layout.add(std::make_unique<MyHostParameter>(m_allFilterParameters->cutoff,
+                                                 combineWithID("cutoff"),
+                                                 "cutoff",
+                                                 juce::NormalisableRange<float>(kStOf10hz, kStOf20000hz, 0.01f),
+                                                 hertzToSemitone(440.f),
+                                                 g_PitchHertzFloatParameterAttribute),
+               std::make_unique<MyHostParameter>(m_allFilterParameters->resonance,
+                                                 combineWithID("resonance"),
+                                                 "resonance",
+                                                 juce::NormalisableRange <float>(0.f, 1.f, 0.01f),
+                                                 0.f),
+               std::make_unique<MyHostParameter>(m_allFilterParameters->phase,
+                                                 combineWithID("Phase"),
+                                                 "Phase",
+                                                 juce::NormalisableRange<float>(0.f, 1.f, 0.01f),
+                                                 0.f)
     );
 
     // router parameters
@@ -69,24 +64,25 @@ void MainFilter::addParameterToLayout(juce::AudioProcessorValueTreeState::Parame
         auto pp = std::make_unique<juce::AudioParameterBool>(
             combineWithID(set.pProcessor->combineWithID("input")),
             combineWithID(set.pProcessor->combineWithID("input")),
-            true);
+            false);
         set.pJuceParameter = pp.get();
         layout.add(std::move(pp));
     }
 }
 
-void MainFilter::updateParameters(size_t numSamples) {
-    m_allFilterParameters->cutoff.updateParameter(numSamples);
-    m_allFilterParameters->resonance.updateParameter(numSamples);
-    m_allFilterParameters->limitVolume.updateParameter(numSamples);
-    m_allFilterParameters->limitK.updateParameter(numSamples);
-}
+//void MainFilter::updateParameters(size_t numSamples) {
+//    m_allFilterParameters->cutoff.updateParameter(numSamples);
+//    m_allFilterParameters->resonance.updateParameter(numSamples);
+//    m_allFilterParameters->limitVolume.updateParameter(numSamples);
+//    m_allFilterParameters->limitK.updateParameter(numSamples);
+//}
 
-void MainFilter::prepareParameters(FType sampleRate, size_t numSamples) {
-    m_allFilterParameters->cutoff.prepare(sampleRate, numSamples);
-    m_allFilterParameters->resonance.prepare(sampleRate, numSamples);
-    m_allFilterParameters->limitVolume.prepare(sampleRate, numSamples);
-    m_allFilterParameters->limitK.prepare(sampleRate, numSamples);
+void MainFilter::prepareParameters(FType sampleRate, size_t /*numSamples*/) {
+    //m_allFilterParameters->cutoff.prepare(sampleRate);
+    //m_allFilterParameters->resonance.prepare(sampleRate);
+    //m_allFilterParameters->limitVolume.prepare(sampleRate);
+    //m_allFilterParameters->limitK.prepare(sampleRate);
+    m_allFilterParameters->prepare(sampleRate);
 }
 //=============================================================================
 
@@ -94,7 +90,6 @@ void MainFilter::prepare(FType sampleRate, size_t numSamlpes) {
     // buffer init
     m_filterInputBuffer.resize(numSamlpes);
     m_filterOutputBuffer.resize(numSamlpes);
-    m_processorOutputBuffer.resize(numSamlpes);
 
     // init for all filters
     for (auto f : m_allFilters) {
@@ -103,50 +98,21 @@ void MainFilter::prepare(FType sampleRate, size_t numSamlpes) {
 }
 
 void MainFilter::process(size_t beginSamplePos, size_t endSamplePos) {
-    // process change filter event
-    if (m_isFilterChanged) {
-        m_currentFilterImpl = m_allFilters.getReference(m_newFilterName);
-        m_currentFilterImpl->reset();
-        m_isFilterChanged = false;
-    }
-
-    // Clear outputs and input
-    m_processorOutputBuffer.clear();
-    m_filterInputBuffer.clear();
-    m_filterOutputBuffer.clear();
-
     // Mix input source
     size_t numSample = endSamplePos - beginSamplePos;
     for (auto& i : m_inputRouter) {
         // Atomic,may be Thread-safe?
-        bool bypass = !i.pJuceParameter->get();
-        if (bypass) {
-            juce::FloatVectorOperations::add(m_processorOutputBuffer.left.data() + beginSamplePos,
-                                             i.pProcessOutputBuffer->left.data() + beginSamplePos,
-                                             numSample);
-            juce::FloatVectorOperations::add(m_processorOutputBuffer.right.data() + beginSamplePos,
-                                             i.pProcessOutputBuffer->right.data() + beginSamplePos,
-                                             numSample);
-        } else {
-            juce::FloatVectorOperations::add(m_filterInputBuffer.left.data() + beginSamplePos,
-                                             i.pProcessOutputBuffer->left.data() + beginSamplePos,
-                                             numSample);
-            juce::FloatVectorOperations::add(m_filterInputBuffer.right.data() + beginSamplePos,
-                                             i.pProcessOutputBuffer->right.data() + beginSamplePos,
-                                             numSample);
+        bool bInput = i.pJuceParameter->get();
+        if (bInput) {
+            i.pProcessor->setFlag();
+            juce::FloatVectorOperations::add(reinterpret_cast<FType*>(m_filterInputBuffer.buffer.data() + beginSamplePos),
+                                             reinterpret_cast<FType*>(i.pProcessOutputBuffer->buffer.data() + beginSamplePos),
+                                             2 * numSample);
         }
     }
 
     // Filter process
     m_currentFilterImpl->process(m_filterInputBuffer, m_filterOutputBuffer, beginSamplePos, endSamplePos);
-
-    // Mix final output
-    juce::FloatVectorOperations::add(m_processorOutputBuffer.left.data() + beginSamplePos,
-                                     m_filterOutputBuffer.left.data() + beginSamplePos,
-                                     numSample);
-    juce::FloatVectorOperations::add(m_processorOutputBuffer.right.data() + beginSamplePos,
-                                     m_filterOutputBuffer.right.data() + beginSamplePos,
-                                     numSample);
 }
 
 void MainFilter::saveExtraState(juce::XmlElement& xml) {
@@ -159,6 +125,18 @@ void MainFilter::loadExtraState(juce::XmlElement& xml, juce::AudioProcessorValue
     if (filterXML == nullptr) return;
 
     changeFilter(filterXML->getStringAttribute(kFilterNameAttribute));
+}
+
+void MainFilter::onCRClock(size_t n) {
+    m_allFilterParameters->onCRClock();
+    m_currentFilterImpl->onCRClock(n);
+
+    // process change filter event
+    if (m_isFilterChanged) {
+        m_currentFilterImpl = m_allFilters.getReference(m_newFilterName);
+        m_currentFilterImpl->reset();
+        m_isFilterChanged = false;
+    }
 }
 
 void MainFilter::changeFilter(const juce::String& filterType) {
@@ -204,5 +182,9 @@ void MainFilter::doLayout(ui::FilterKnobsPanel& p, const juce::String& name) {
     if (!m_allFilters.contains(name)) return;
 
     m_allFilters.getReference(name)->doLayout(p);
+}
+
+void MainFilter::clearBuffer() {
+    m_filterInputBuffer.clear();
 }
 }

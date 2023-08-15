@@ -34,7 +34,7 @@ static Type hertzToSemitone(Type hz, Type frequencyOfA = static_cast<Type>(440))
     return static_cast<Type>(69) + static_cast<Type>(12) * std::log2(hz / frequencyOfA);
 }
 
-inline static const rpSynth::audio::FType kStOf20hz = rpSynth::hertzToSemitone(20.f);
+inline static const rpSynth::audio::FType kStOf10hz = rpSynth::hertzToSemitone(10.f);
 inline static const rpSynth::audio::FType kStOf20000hz = rpSynth::hertzToSemitone(20000.f);
 
 inline static const struct MyStrings {

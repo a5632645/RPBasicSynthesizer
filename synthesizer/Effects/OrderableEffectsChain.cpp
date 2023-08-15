@@ -49,11 +49,11 @@ void OrderableEffectsChain::addParameterToLayout(juce::AudioProcessorValueTreeSt
     }
 }
 
-void OrderableEffectsChain::updateParameters(size_t numSamples) {
-    for (auto& p : m_effectsChain) {
-        p->updateParameters(numSamples);
-    }
-}
+//void OrderableEffectsChain::updateParameters(size_t numSamples) {
+//    for (auto& p : m_effectsChain) {
+//        p->updateParameters(numSamples);
+//    }
+//}
 
 void OrderableEffectsChain::prepareParameters(FType sampleRate, size_t numSamples) {
     for (auto& p : m_effectsChain) {
@@ -70,11 +70,6 @@ void OrderableEffectsChain::prepare(FType sampleRate, size_t numSamlpes) {
 }
 
 void OrderableEffectsChain::process(size_t beginSamplePos, size_t endSamplePos) {
-    // copy buffer first
-    size_t size = m_audioBuffer.left.size();
-    juce::FloatVectorOperations::copy(m_audioBuffer.left.data(), m_inputBuffer->left.data(), size);
-    juce::FloatVectorOperations::copy(m_audioBuffer.right.data(), m_inputBuffer->right.data(), size);
-
     // order lock
     const juce::ScopedLock lock{m_orderLock};
 
@@ -129,6 +124,14 @@ void OrderableEffectsChain::loadExtraState(juce::XmlElement& xml, juce::AudioPro
         p->loadExtraState(*chainXML, apvts);
     }
 }
+
+void OrderableEffectsChain::onCRClock(size_t n) {
+    for (auto& f : m_effectsChain) {
+        if (f->notBypass->get()) {
+            f->onCRClock(n);
+        }
+    }
+}
 //================================================================================
 
 //================================================================================
@@ -136,10 +139,10 @@ void OrderableEffectsChain::reOrderProcessor(const juce::String& processorID, in
     auto oldIndex = m_effectProcessorIndexes.getReference(processorID);
     reOrderProcessor(oldIndex, newIndex);
 }
-
-void OrderableEffectsChain::setAudioInput(NonNullPtr<StereoBuffer> input) {
-    m_inputBuffer = input.ptr;
-}
+//
+//void OrderableEffectsChain::setAudioInput(NonNullPtr<StereoBuffer> input) {
+//    m_inputBuffer = input.ptr;
+//}
 
 void OrderableEffectsChain::reOrderProcessor(int oldIndex, int newIndex) {
     if (newIndex == oldIndex) return;
@@ -168,6 +171,10 @@ void OrderableEffectsChain::reOrderProcessor(int oldIndex, int newIndex) {
     // swap chain
     const juce::ScopedLock lock{m_orderLock};
     m_effectsChain.swap(newProcessorOrder);
+}
+
+void OrderableEffectsChain::clearBuffer() {
+    m_audioBuffer.clear();
 }
 //================================================================================
 

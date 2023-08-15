@@ -40,15 +40,21 @@ public:
         }
     }
 
-    void updateParameters(size_t numSamples) override {
+    /*void updateParameters(size_t numSamples) override {
         for (auto& m : m_modulators) {
             m->updateParameters(numSamples);
         }
+    }*/
+
+    void process(size_t /*beginSamplePos*/, size_t /*endSamplePos*/) override {
+        /*for (auto& m : m_modulators) {
+            m->process(beginSamplePos, endSamplePos);
+        }*/
     }
 
-    void process(size_t beginSamplePos, size_t endSamplePos) override {
+    void onCRClock(size_t n) override {
         for (auto& m : m_modulators) {
-            m->process(beginSamplePos, endSamplePos);
+            m->onCRClock(n);
         }
     }
 

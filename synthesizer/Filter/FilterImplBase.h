@@ -43,6 +43,7 @@ public:
     virtual void reset() {}
     virtual void prepare(FType /*sampleRate*/, size_t /*numSamples*/) {}
     virtual void doLayout(ui::FilterKnobsPanel&) {}
+    virtual void onCRClock(size_t) {}
     //=========================================================================
 private:
     juce::String m_filterName;

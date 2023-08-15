@@ -11,8 +11,8 @@
 #include "FinalModulationPanel.h"
 
 #include "synthesizer/BasicSynthesizer.h"
-
 #include "ui/modulation/ModulationPanel.h"
+#include "ui/controller/ModulableUIBase.h"
 
 namespace rpSynth::ui {
 FinalModulationPanel::FinalModulationPanel(audio::BasicSynthesizer& s,

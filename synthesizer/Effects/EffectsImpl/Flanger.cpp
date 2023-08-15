@@ -9,60 +9,75 @@
 */
 
 #include "Flanger.h"
-#include "synthesizer/WrapParameter.h"
-#include "dsps/IIRHilbertTransform.h"
+#include "synthesizer/NewWrapParameter.h"
+#include "synthesizer/dsps/IIRHilbertTransform.h"
 
 #include "ui/controller/FloatKnob.h"
 
 //================================================================================
-// »´≤øœ‚±ﬂ∆˜µƒ≤Œ ˝
+// ÂÖ®ÈÉ®Èï∂ËæπÂô®ÁöÑÂèÇÊï∞
 //================================================================================
 namespace rpSynth::audio::effects {
 struct FlangerParameters {
-    MyAudioProcessParameter TZFDelayTime;                 // TZF∂‘∏…–≈∫≈—”≥Ÿ[0,10]ms
-    MyAudioProcessParameter delayTime;                    // —”≥Ÿ ±º‰[0,10]ms
-    MyAudioProcessParameter feedback;                     // ∑¥¿°[-1,1]
-    MyAudioProcessParameter fbLowCut;                     // ∑¥¿°µÕ«–[20,20000]hz
-    MyAudioProcessParameter fbHighCut;                    // ∑¥¿°∏ﬂ«–[20,20000]hz
-    MyAudioProcessParameter mix;                          // ªÏ∫œ[-1,1]
-    MyAudioProcessParameter rate;                         // LFOÀŸ¬ [0,5]hz
-    MyAudioProcessParameter barberpoleRate;               // ¡Ì“ª∏ˆLFOÀŸ¬ [-10,10]hz
-    MyAudioProcessParameter depth;                        // …Ó∂»[0,1]
-    MyAudioProcessParameter barberpolePhase;              // barberpoleµƒLFOœ‡Œª[0,1]
-    MyAudioProcessParameter lfoPhase;                     // LFOœ‡≤Óœ‡Œª[0,1]
-    MyAudioProcessParameter lfoShape;                     // LFO–Œ◊¥¥”»˝Ω«≤®µΩ’˝œ“≤®[0,1]
-    juce::AudioParameterBool* disableBarberpole = nullptr;// Ω˚”√œ£∂˚≤ÆÃÿµº÷¬µƒœ‡ŒªŒ Ã‚
+    MyAudioParameter TZFDelayTime;                 // TZFÂØπÂπ≤‰ø°Âè∑Âª∂Ëøü[0,10]ms
+    MyAudioParameter delayTime;                    // Âª∂ËøüÊó∂Èó¥[0,10]ms
+    MyAudioParameter feedback;                     // ÂèçÈ¶à[-1,1]
+    MyAudioParameter fbLowCut;                     // ÂèçÈ¶à‰ΩéÂàá[20,20000]hz
+    MyAudioParameter fbHighCut;                    // ÂèçÈ¶àÈ´òÂàá[20,20000]hz
+    MyAudioParameter mix;                          // Ê∑∑Âêà[-1,1]
+    MyAudioParameter rate;                         // LFOÈÄüÁéá[0,5]hz
+    MyAudioParameter barberpoleRate;               // Âè¶‰∏Ä‰∏™LFOÈÄüÁéá[-10,10]hz
+    MyAudioParameter depth;                        // Ê∑±Â∫¶[0,1]
+    MyAudioParameter barberpolePhase;              // barberpoleÁöÑLFOÁõ∏‰Ωç[0,1]
+    MyAudioParameter lfoPhase;                     // LFOÁõ∏Â∑ÆÁõ∏‰Ωç[0,1]
+    MyAudioParameter lfoShape;                     // LFOÂΩ¢Áä∂‰ªé‰∏âËßíÊ≥¢Âà∞Ê≠£Âº¶Ê≥¢[0,1]
+    juce::AudioParameterBool* disableBarberpole = nullptr;// Á¶ÅÁî®Â∏åÂ∞î‰ºØÁâπÂØºËá¥ÁöÑÁõ∏‰ΩçÈóÆÈ¢ò
 
     // Merge all
-    void prepareAll(FType sr, size_t num) {
-        TZFDelayTime.prepare(sr, num);
-        delayTime.prepare(sr, num);
-        feedback.prepare(sr, num);
-        fbLowCut.prepare(sr, num);
-        fbHighCut.prepare(sr, num);
-        mix.prepare(sr, num);
-        rate.prepare(sr, num);
-        barberpoleRate.prepare(sr, num);
-        depth.prepare(sr, num);
-        barberpolePhase.prepare(sr, num);
-        lfoPhase.prepare(sr, num);
-        lfoShape.prepare(sr, num);
+    void prepareAll(FType sr, size_t /*num*/) {
+        TZFDelayTime.prepare(sr);
+        delayTime.prepare(sr);
+        feedback.prepare(sr);
+        fbLowCut.prepare(sr);
+        fbHighCut.prepare(sr);
+        mix.prepare(sr);
+        rate.prepare(sr);
+        barberpoleRate.prepare(sr);
+        depth.prepare(sr);
+        barberpolePhase.prepare(sr);
+        lfoPhase.prepare(sr);
+        lfoShape.prepare(sr);
     }
 
-    void updateAll(size_t num) {
-        TZFDelayTime.updateParameter(num);
-        delayTime.updateParameter(num);
-        feedback.updateParameter(num);
-        fbLowCut.updateParameter(num);
-        fbHighCut.updateParameter(num);
-        mix.updateParameter(num);
-        rate.updateParameter(num);
-        barberpoleRate.updateParameter(num);
-        depth.updateParameter(num);
-        barberpolePhase.updateParameter(num);
-        lfoPhase.updateParameter(num);
-        lfoShape.updateParameter(num);
+    void onCRClock() {
+        TZFDelayTime.onCRClock();
+        delayTime.onCRClock();
+        feedback.onCRClock();
+        fbLowCut.onCRClock();
+        fbHighCut.onCRClock();
+        mix.onCRClock();
+        rate.onCRClock();
+        barberpoleRate.onCRClock();
+        depth.onCRClock();
+        barberpolePhase.onCRClock();
+        lfoPhase.onCRClock();
+        lfoShape.onCRClock();
     }
+
+    //void updateAll(size_t num) {
+    //    TZFDelayTime.updateParameter(num);
+    //    delayTime.updateParameter(num);
+    //    feedback.updateParameter(num);
+    //    fbLowCut.updateParameter(num);
+    //    fbHighCut.updateParameter(num);
+    //    mix.updateParameter(num);
+    //    rate.updateParameter(num);
+    //    barberpoleRate.updateParameter(num);
+    //    depth.updateParameter(num);
+    //    barberpolePhase.updateParameter(num);
+    //    lfoPhase.updateParameter(num);
+    //    lfoShape.updateParameter(num);
+    //}
 };
 
 //================================================================================
@@ -170,11 +185,11 @@ private:
 //================================================================================
 class FlangerImpl {
 public:
-    // œ‚±ﬂ∆˜—”≥Ÿ∫ÕZDF—”≥Ÿ∆Ωª¨ ±º‰
+    // Èï∂ËæπÂô®Âª∂ËøüÂíåZDFÂª∂ËøüÂπ≥ÊªëÊó∂Èó¥
     static constexpr double kDelaySmoothTime = 0.1;
 
     //================================================================================
-    // ’˝œ“»˝Ω«LFO
+    // Ê≠£Âº¶‰∏âËßíLFO
     //================================================================================
     class TriSineShapeLFO {
     public:
@@ -184,20 +199,20 @@ public:
         }
 
         /**
-         * @brief »√LFO‘⁄CRƒ£ Ωœ¬‘À––“ª¥Œ
-         * @param fre ∆µ¬ 
-         * @param step CR¡Ω∏ˆ ±÷”÷Æº‰µƒ ±º‰≤Ó‘⁄SRœ¬µƒ≤…—˘ ˝≤Ó
-         * @param phase ∂ÓÕ‚µƒœ‡Œª‘ˆº”
-         * @param shape –Œ◊¥,[0,1]¥”»˝Ω«œﬂ–‘≤Â÷µµΩ’˝œ“
-         * @return ◊Û:Œﬁ∂ÓÕ‚œ‡Œª‘ˆº”;”“:”–∂ÓÕ‚œ‡Œª‘ˆº”;æ˘Œ™[-1,1]
+         * @brief ËÆ©LFOÂú®CRÊ®°Âºè‰∏ãËøêË°å‰∏ÄÊ¨°
+         * @param fre È¢ëÁéá
+         * @param step CR‰∏§‰∏™Êó∂Èíü‰πãÈó¥ÁöÑÊó∂Èó¥Â∑ÆÂú®SR‰∏ãÁöÑÈááÊ†∑Êï∞Â∑Æ
+         * @param phase È¢ùÂ§ñÁöÑÁõ∏‰ΩçÂ¢ûÂä†
+         * @param shape ÂΩ¢Áä∂,[0,1]‰ªé‰∏âËßíÁ∫øÊÄßÊèíÂÄºÂà∞Ê≠£Âº¶
+         * @return Â∑¶:Êó†È¢ùÂ§ñÁõ∏‰ΩçÂ¢ûÂä†;Âè≥:ÊúâÈ¢ùÂ§ñÁõ∏‰ΩçÂ¢ûÂä†;Âùá‰∏∫[-1,1]
         */
-        FPolyType CRTick(FType fre, size_t step, FType phase, FType shape) {
+        PolyFType CRTick(FType fre, size_t step, FType phase, FType shape) {
             auto phaseAdd = step * fre * m_oneDivSampleRate;
             m_phase += phaseAdd;
             m_phase = std::fmod(m_phase, static_cast<FType>(1));
             auto ppp = std::fmod(m_phase + phase, static_cast<FType>(1));
 
-            FPolyType LR{};
+            PolyFType LR{};
             LR.left = triToSin(m_phase, shape);
             LR.right = triToSin(ppp, shape);
             return LR;
@@ -223,13 +238,13 @@ public:
             m_oneDivSampleRate = 1 / sr;
         }
 
-        FPolyType SRTick(FType fre, FType additionalPhase) {
+        PolyFType SRTick(FType fre, FType additionalPhase) {
             auto phaseAdd = fre * m_oneDivSampleRate;
             m_phase += phaseAdd;
             m_phase = std::fmod(m_phase, static_cast<FType>(1));
             auto ppp = std::fmod(m_phase + additionalPhase, static_cast<FType>(1));
 
-            FPolyType pp{};
+            PolyFType pp{};
             pp.left = juce::dsp::FastMathApproximations::cos(juce::MathConstants<FType>::twoPi * ppp);
             pp.right = juce::dsp::FastMathApproximations::sin(juce::MathConstants<FType>::twoPi * ppp);
             return pp;
@@ -252,7 +267,7 @@ public:
         fbLF.prepare(spec);
         fbHF.prepare(spec);
 
-        // Juce::smoothValueª·≥¨≥ˆ…Ë∂®◊Ó¥Û÷µ“™”–∂ÓÕ‚µƒø’º‰
+        // Juce::smoothValue‰ºöË∂ÖÂá∫ËÆæÂÆöÊúÄÂ§ßÂÄºË¶ÅÊúâÈ¢ùÂ§ñÁöÑÁ©∫Èó¥
         constexpr int extraSample = 8;
         auto maxDelayInSample = static_cast<int>(m_srDiv1000 * p.delayTime.getHostParameter()->range.end
                                                  + m_srDiv1000 * p.depth.getHostParameter()->range.end);
@@ -268,56 +283,80 @@ public:
     }
 
     void process(StereoBuffer& buffer, size_t begin, size_t end) {
+        if (p.disableBarberpole->get()) {
+            processChannelWithoutHilbert(buffer, begin, end);
+        } else {
+            processChannel(buffer, begin, end);
+        }
+    }
+
+    void onCRClock(size_t n) {
         // Feedback filter
-        fbLF.setCutoffFrequency(p.fbLowCut.get(begin));
-        fbHF.setCutoffFrequency(p.fbHighCut.get(begin));
+        fbLF.setCutoffFrequency(p.fbLowCut.getTargetValue());
+        fbHF.setCutoffFrequency(p.fbHighCut.getTargetValue());
+
+        // tzf delay
+        FType tzfDelayInSample = p.TZFDelayTime.getTargetValue() * m_srDiv1000;
+        m_TZFDelaySmoother.setTargetValue(tzfDelayInSample);
 
         // delay
-        FType tzfDelayInSample = p.TZFDelayTime.get(begin) * m_srDiv1000;
-        FType mainDelayInSample = p.delayTime.get(begin) * m_srDiv1000;
-        FType depthInSample = p.depth.get(begin) * m_srDiv1000;
-        FPolyType LRPhase = m_mainDelayLFO.CRTick(p.rate.get(begin), end - begin, p.lfoPhase.get(begin), p.lfoShape.get(begin));
+        FType mainDelayInSample = p.delayTime.getTargetValue() * m_srDiv1000;
+        FType depthInSample = p.depth.getTargetValue() * m_srDiv1000;
+        PolyFType LRPhase = m_mainDelayLFO.CRTick(p.rate.getTargetValue(), n, p.lfoPhase.getTargetValue(), p.lfoShape.getTargetValue());
         FType lDelay = juce::jmax(FType{}, mainDelayInSample + LRPhase.left * depthInSample);
         FType rDelay = juce::jmax(FType{}, mainDelayInSample + LRPhase.right * depthInSample);
-        setDelayTime<0>(lDelay, tzfDelayInSample);
-        setDelayTime<1>(rDelay, tzfDelayInSample);
-
-        if (p.disableBarberpole->get()) {
-            processChannelWithoutHilbert<0>(buffer.left, begin, end);
-            processChannelWithoutHilbert<1>(buffer.right, begin, end);
-        } else {
-            processChannel<0>(buffer.left, begin, end);
-            processChannel<1>(buffer.right, begin, end);
-        }
+        m_leftDelaySmoother.setTargetValue(lDelay);
+        m_rightDelaySmoother.setTargetValue(rDelay);
     }
 
     //================================================================================
     // Barberpole Flanger                +-> out
     //                                   |
-    // in-->TZFDelay------------------->Mix<-----+
-    // °˝                                 °¸       |
-    // Add--->Delay--->SSBFreShift-------+       |
-    // °¸       °¸          °¸              |       |
-    // |      LFO        LFO          Feedback---+
+    // in-->TZFDelay------------------->Mix
+    // ‚Üì                                 ‚Üë       
+    // Add--->Delay--->SSBFreShift-------+       
+    // ‚Üë       ‚Üë          ‚Üë              |       
+    // |      LFO        LFO          Feedback
     // +---------------------------------+
     //================================================================================
-    template<size_t channel>
-    void processChannel(std::vector<FType>& data, size_t begin, size_t end) {
+    void processChannel(StereoBuffer& data, size_t begin, size_t end) {
         for (size_t i = begin; i < end; i++) {
-            FType sample = data[i];
-            auto fbVal = juce::jlimit(FType{-0.9}, FType{0.9}, p.feedback.get(i)) 
-                * getFeedback<channel>();
-            m_TZFdelayLine.pushSample(channel, sample);
-            FType tzfout = m_TZFdelayLine.popSample(channel, getTZFDelayTime<channel>());
-            m_delayLine.pushSample(channel, sample + fbVal);
-            auto delayout = m_delayLine.popSample(channel, getDelayTime<channel>());
+            PolyFType sample = data[i];
+            PolyFType fbVal = juce::jlimit(FType{-0.9}, FType{0.9}, p.feedback.getNextValue()) 
+                * m_fbValue;
+            m_TZFdelayLine.pushSample(0, sample.left);
+            m_TZFdelayLine.pushSample(1, sample.right);
+            FType tzfDelaySample = m_TZFDelaySmoother.getNextValue();
+            PolyFType tzfout{};
+            tzfout.left = m_TZFdelayLine.popSample(0, tzfDelaySample);
+            tzfout.right = m_TZFdelayLine.popSample(1, tzfDelaySample);
 
-            FPolyType hilbertMid = hilbert<channel>(delayout);
-            auto sincos = getBarberLFO<channel>(p.barberpoleRate.get(i), p.barberpolePhase.get(i));
-            auto hilbertOut = sincos.right * hilbertMid.left + sincos.left * hilbertMid.right;
-            auto mixout = tzfout + p.mix.get(i) * hilbertOut + fbVal;
+            m_delayLine.pushSample(0, sample.left + fbVal.left);
+            m_delayLine.pushSample(1, sample.right + fbVal.right);
+            PolyFType delayout{};
+            delayout.left = m_delayLine.popSample(0, m_leftDelaySmoother.getNextValue());
+            delayout.right = m_delayLine.popSample(1, m_rightDelaySmoother.getNextValue());
 
-            fbUpdate<channel>(hilbertOut);
+            PolyFType hilbertLout{};
+            PolyFType hilbertRout{};
+            hilbertL.process(delayout.left, &hilbertLout.left, &hilbertLout.right);
+            hilbertR.process(delayout.right, &hilbertRout.left, &hilbertRout.right);
+            
+            FType barberRate = p.barberpoleRate.getNextValue();
+            FType barberPhase = p.barberpolePhase.getNextValue();
+            PolyFType sincosL = m_leftBarberpoleLFO.SRTick(barberRate, FType{});
+            PolyFType sincosR = m_rightBarberpoleLFO.SRTick(barberRate, barberPhase);
+
+            PolyFType hilbertOut{};
+            hilbertOut.left = sincosL.right * hilbertLout.left + sincosL.left * hilbertLout.right;
+            hilbertOut.right = sincosR.right * hilbertRout.left + sincosR.left * hilbertRout.right;
+            auto mixout = tzfout + p.mix.getNextValue() * hilbertOut;
+
+            m_fbValue.left = fbLF.processSample(0, fbHF.processSample(0, hilbertOut.left));
+            m_fbValue.right = fbLF.processSample(1, fbHF.processSample(1, hilbertOut.right));
+            fbLF.snapToZero();
+            fbHF.snapToZero();
+
             data[i] = mixout;
         }
     }
@@ -326,112 +365,55 @@ public:
     // TZF Flanger                       +-> out
     //                                   |
     // in-->TZFDelay--------------------Mix
-    // °˝                                 °¸ 
+    // ‚Üì                                 ‚Üë 
     // Add--->Delay----------------------+
-    // °¸       °¸                         °˝       
+    // ‚Üë       ‚Üë                         ‚Üì       
     // |      LFO                    Feedback
     // +---------------------------------+
     //================================================================================
-    template<size_t channel>
-    void processChannelWithoutHilbert(std::vector<FType>& data, size_t begin, size_t end) {
+    void processChannelWithoutHilbert(StereoBuffer& data, size_t begin, size_t end) {
         for (size_t i = begin; i < end; i++) {
-            FType sample = data[i];
-            m_TZFdelayLine.pushSample(channel, sample);
-            FType tzfout = m_TZFdelayLine.popSample(channel, getTZFDelayTime<channel>());
+            PolyFType sample = data[i];
+            m_TZFdelayLine.pushSample(0, sample.left);
+            m_TZFdelayLine.pushSample(1, sample.right);
 
-            auto withFb = sample + p.feedback.get(i) * getFeedback<channel>();
-            m_delayLine.pushSample(channel, withFb);
-            auto delayout = m_delayLine.popSample(channel, getDelayTime<channel>());
-            auto mixout = tzfout + p.mix.get(i) * delayout;
+            PolyFType tzfout{};
+            FType tzfDelaySample = m_TZFDelaySmoother.getNextValue();
+            tzfout.left = m_TZFdelayLine.popSample(0, tzfDelaySample);
+            tzfout.right = m_TZFdelayLine.popSample(1, tzfDelaySample);
 
-            fbUpdate<channel>(delayout);
+            PolyFType withFb = sample + p.feedback.getNextValue() * m_fbValue;
+            m_delayLine.pushSample(0, withFb.left);
+            m_delayLine.pushSample(1, withFb.right);
+
+            PolyFType delayout{};
+            delayout.left = m_delayLine.popSample(0, m_leftDelaySmoother.getNextValue());
+            delayout.right = m_delayLine.popSample(1, m_rightDelaySmoother.getNextValue());
+
+            PolyFType mixout = tzfout + p.mix.getNextValue() * delayout;
+
+            m_fbValue.left = fbLF.processSample(0, fbHF.processSample(0, delayout.left));
+            m_fbValue.right = fbLF.processSample(1, fbHF.processSample(1, delayout.right));
+            fbLF.snapToZero();
+            fbHF.snapToZero();
+
             data[i] = mixout;
         }
     }
-
-private:
-    template<size_t channel>
-    void setDelayTime(FType mainD, FType tzfD) {
-        if constexpr (channel == 0) {
-            m_leftDelaySmoother.setTargetValue(mainD);
-            m_leftTZFDelaySmoother.setTargetValue(tzfD);
-        } else {
-            m_rightDelaySmoother.setTargetValue(mainD);
-            m_rightTZFDelaySmoother.setTargetValue(tzfD);
-        }
-    }
-
-    template<size_t channel>
-    FPolyType getBarberLFO(FType fre, FType additionalPhase) {
-        if constexpr (channel == 0) {
-            return m_leftBarberpoleLFO.SRTick(fre, FType{});
-        } else {
-            return m_rightBarberpoleLFO.SRTick(fre, additionalPhase);
-        }
-    }
-
-    template<size_t channel>
-    FType getDelayTime() {
-        if constexpr (channel == 0) {
-            return m_leftDelaySmoother.getNextValue();
-        } else {
-            return m_rightDelaySmoother.getNextValue();
-        }
-    }
-
-    template<size_t channel>
-    FType getTZFDelayTime() {
-        if constexpr (channel == 0) {
-            return m_leftTZFDelaySmoother.getNextValue();
-        } else {
-            return m_rightTZFDelaySmoother.getNextValue();
-        }
-    }
-
-    template<size_t channel>
-    FType getFeedback() {
-        if constexpr (channel == 0) {
-            return m_fbValue.left;
-        } else {
-            return m_fbValue.right;
-        }
-    }
-
-    template<size_t channel>
-    void fbUpdate(FType s) {
-        if constexpr (channel == 0) {
-            m_fbValue.left = fbHF.processSample(channel, fbLF.processSample(channel, s));
-        } else {
-            m_fbValue.right = fbHF.processSample(channel, fbLF.processSample(channel, s));
-        }
-    }
-
-    template<size_t channel>
-    FPolyType hilbert(FType s) {
-        FPolyType ss{};
-        if constexpr (channel == 0) {
-            hilbertL.process(s, &ss.left, &ss.right);
-        } else {
-            hilbertR.process(s, &ss.left, &ss.right);
-        }
-        return ss;
-    }
-
 private:
     // LFO
     TriSineShapeLFO m_mainDelayLFO;
     SinCosLFO m_leftBarberpoleLFO;
     SinCosLFO m_rightBarberpoleLFO;
 
-    // œﬂ–‘∆Ωª¨∆˜
+    // Á∫øÊÄßÂπ≥ÊªëÂô®
     juce::SmoothedValue<FType> m_leftDelaySmoother;
     juce::SmoothedValue<FType> m_rightDelaySmoother;
-    juce::SmoothedValue<FType> m_leftTZFDelaySmoother;
-    juce::SmoothedValue<FType> m_rightTZFDelaySmoother;
+    juce::SmoothedValue<FType> m_TZFDelaySmoother;
 
     FlangerParameters& p;
     FType m_srDiv1000{};
-    FPolyType m_fbValue{};
+    PolyFType m_fbValue{};
     juce::dsp::DelayLine<FType> m_delayLine;
     juce::dsp::DelayLine<FType> m_TZFdelayLine;
     juce::dsp::FirstOrderTPTFilter<FType> fbLF;
@@ -459,62 +441,62 @@ Flanger::~Flanger() {
 void Flanger::addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) {
     EffectProcessorBase::addParameterToLayout(layout);
     layout.add(
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->TZFDelayTime,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->TZFDelayTime,
                                                           combineWithID("TZFDelay"),
                                                           "TZFDelay",
                                                           juce::NormalisableRange(0.f, 10.f, 0.01f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->delayTime,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->delayTime,
                                                           combineWithID("Delay"),
                                                           "Delay",
                                                           juce::NormalisableRange(0.f, 10.f, 0.01f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->feedback,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->feedback,
                                                           combineWithID("Feedback"),
                                                           "Feedback",
                                                           juce::NormalisableRange(-0.99f, 0.99f, 0.01f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->fbLowCut,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->fbLowCut,
                                                           combineWithID("FB_LowCut"),
                                                           "FB_LowCut",
                                                           juce::NormalisableRange(20.f, 20000.f, 1.f),
                                                           20000.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->fbHighCut,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->fbHighCut,
                                                           combineWithID("FB_HighCut"),
                                                           "FB_HighCut",
                                                           juce::NormalisableRange(20.f, 20000.f, 1.f),
                                                           20.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->mix,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->mix,
                                                           combineWithID("mix"),
                                                           "mix",
                                                           juce::NormalisableRange<float>(-1.f, 1.f, 0.01f),
                                                           1.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->rate,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->rate,
                                                           combineWithID("Rate"),
                                                           "Rate",
                                                           juce::NormalisableRange(-2.f, 2.f, 0.1f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->barberpoleRate,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->barberpoleRate,
                                                           combineWithID("BarberRate"),
                                                           "BarberRate",
                                                           juce::NormalisableRange(-10.f, 10.f, 0.1f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->depth,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->depth,
                                                           combineWithID("Depth"),
                                                           "Depth",
                                                           juce::NormalisableRange(0.f, 10.f, 0.1f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->barberpolePhase,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->barberpolePhase,
                                                           combineWithID("BarberPhase"),
                                                           "BarberPhase",
                                                           juce::NormalisableRange(0.f, 1.f, 0.01f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->lfoPhase,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->lfoPhase,
                                                           combineWithID("LFOPhase"),
                                                           "Phase",
                                                           juce::NormalisableRange(0.f, 1.f, 0.01f),
                                                           0.f),
-        std::make_unique<MyHostedAudioProcessorParameter>(&m_allFlangerParameters->lfoShape,
+        std::make_unique<MyHostParameter>(m_allFlangerParameters->lfoShape,
                                                           combineWithID("LFOShape"),
                                                           "LFOShape",
                                                           juce::NormalisableRange(0.f, 1.f, 0.01f),
@@ -528,9 +510,9 @@ void Flanger::addParameterToLayout(juce::AudioProcessorValueTreeState::Parameter
     layout.add(std::move(pDisable));
 }
 
-void Flanger::updateParameters(size_t numSamples) {
-    m_allFlangerParameters->updateAll(numSamples);
-}
+//void Flanger::updateParameters(size_t numSamples) {
+//    m_allFlangerParameters->updateAll(numSamples);
+//}
 
 void Flanger::prepareParameters(FType sampleRate, size_t numSamples) {
     m_allFlangerParameters->prepareAll(sampleRate, numSamples);
@@ -552,5 +534,10 @@ void Flanger::processBlock(StereoBuffer& block, size_t begin, size_t end) {
 
 std::unique_ptr<ui::ContainModulableComponent> Flanger::createEffectPanel() {
     return std::make_unique<FlangerPanel>(*m_allFlangerParameters);
+}
+
+void Flanger::onCRClock(size_t n) {
+    m_allFlangerParameters->onCRClock();
+    m_flangerImpl->onCRClock(n);
 }
 }

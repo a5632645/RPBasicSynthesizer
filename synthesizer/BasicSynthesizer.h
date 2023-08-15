@@ -28,6 +28,8 @@ class PolyOscillor;
 namespace rpSynth::audio {
 class BasicSynthesizer : public AudioProcessorBase {
 public:
+    static constexpr FType kControlRate = 400.f;// 400hz
+
     BasicSynthesizer(const juce::String& ID);
     ~BasicSynthesizer() override = default;
     /**
@@ -39,12 +41,13 @@ public:
 
     // implement from AudioProcessorBase
     void addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) override;
-    void updateParameters(size_t numSamples) override;
+    //void updateParameters(size_t numSamples) override;
     void prepareParameters(FType sampleRate, size_t numSamples) override;
     void prepare(FType sampleRate, size_t numSamlpes) override;
     void process(size_t beginSamplePos, size_t endSamplePos) override;
     void saveExtraState(juce::XmlElement& xml) override;
     void loadExtraState(juce::XmlElement& xml, juce::AudioProcessorValueTreeState& apvts) override;
+    void onCRClock(size_t) override;
 private:
 
     /**
@@ -55,12 +58,16 @@ private:
     */
     void handleMidiMessage(const juce::MidiMessage& message, size_t lastPosition, size_t position);
 
+    // Use for Control rate
+    size_t m_totalNumSamples{};
+    size_t m_leftNumSamples{};
 public:
     // poly oscillor
     PolyOscillor m_polyOscillor{"OSC1"};
 
     // filter
     MainFilter m_filter{"FILTER1"};
+    MainFilter m_filter2{"FILTER2"};
 
     // fx chain
     OrderableEffectsChain m_fxChain{"FXS"};

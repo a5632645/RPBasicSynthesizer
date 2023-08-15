@@ -11,11 +11,17 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "ModulationPanel.h"
-
-#include "synthesizer/modulation/ModulationManager.h"
 #include "NewModulationPointer.h"
 #include "ui/ContainModulableComponent.h"
+
+namespace rpSynth::ui {
+class ModulableUIBase;
+class ModulatorBase;
+}
+
+namespace rpSynth::audio {
+class ModulationManager;
+}
 
 namespace rpSynth {
 namespace ui {

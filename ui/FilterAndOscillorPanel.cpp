@@ -16,14 +16,17 @@
 rpSynth::ui::FilterAndOscillorPanel::FilterAndOscillorPanel(audio::BasicSynthesizer& b) {
     m_oscPanel1 = std::make_unique<OscillorPanel>(b.m_polyOscillor);
     m_filterPanel1 = std::make_unique<FilterPanel>(b.m_filter);
+    m_filterPanel2 = std::make_unique<FilterPanel>(b.m_filter2);
 
     addAndMakeVisible(m_oscPanel1.get());
     addAndMakeVisible(m_filterPanel1.get());
+    addAndMakeVisible(m_filterPanel2.get());
 }
 
 void rpSynth::ui::FilterAndOscillorPanel::resized() {
     m_oscPanel1->setBoundsRelative(0.f, 0.f, 0.5f, 0.5f);
-    m_filterPanel1->setBoundsRelative(0.5f, 0.f, 0.5f, 0.5f);
+    m_filterPanel1->setBoundsRelative(0.f, 0.5f, 0.5f, 0.5f);
+    m_filterPanel2->setBoundsRelative(0.5f, 0.5f, 0.5f, 0.5f);
 }
 
 void rpSynth::ui::FilterAndOscillorPanel::paint(juce::Graphics& g) {
@@ -33,4 +36,5 @@ void rpSynth::ui::FilterAndOscillorPanel::paint(juce::Graphics& g) {
 void rpSynth::ui::FilterAndOscillorPanel::showModulationFrom(audio::ModulatorBase* p) {
     m_oscPanel1->showModulationFrom(p);
     m_filterPanel1->showModulationFrom(p);
+    m_filterPanel2->showModulationFrom(p);
 }

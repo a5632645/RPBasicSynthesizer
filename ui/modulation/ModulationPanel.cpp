@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 #include "ModulationPanel.h"
+#include "synthesizer/modulation/ModulationManager.h"
+#include "ui/controller/ModulableUIBase.h"
 
 namespace rpSynth {
 namespace ui {
@@ -95,7 +97,7 @@ ModulationPanel::SmallMouseListener::SmallMouseListener() {
 
 void ModulationPanel::SmallMouseListener::mouseDown(const juce::MouseEvent& e) {
     // Exception: Must have a topMostComponent to put pointer
-    // 异常: 应该有一个顶层部件放置拖拽指示器
+    // 寮傚父: 搴旇鏈変竴涓《灞傞儴浠舵斁缃嫋鎷芥寚绀哄櫒
     // see @setTopMostParentPanel
     jassert(m_topMostParentComponent != nullptr);
 
@@ -112,7 +114,7 @@ void ModulationPanel::SmallMouseListener::mouseDown(const juce::MouseEvent& e) {
 
 void ModulationPanel::SmallMouseListener::mouseDrag(const juce::MouseEvent& e) {
     // Exception: Must have a topMostComponent to put pointer
-    // 异常: 应该有一个顶层部件放置拖拽指示器
+    // 寮傚父: 搴旇鏈変竴涓《灞傞儴浠舵斁缃嫋鎷芥寚绀哄櫒
     // see @setTopMostParentPanel
     jassert(m_topMostParentComponent != nullptr);
 
@@ -123,7 +125,7 @@ void ModulationPanel::SmallMouseListener::mouseDrag(const juce::MouseEvent& e) {
 
 void ModulationPanel::SmallMouseListener::mouseUp(const juce::MouseEvent& e) {
     // Exception: Must have a topMostComponent to put pointer
-    // 异常: 应该有一个顶层部件放置拖拽指示器
+    // 寮傚父: 搴旇鏈変竴涓《灞傞儴浠舵斁缃嫋鎷芥寚绀哄櫒
     // see @setTopMostParentPanel
     jassert(m_topMostParentComponent != nullptr);
 

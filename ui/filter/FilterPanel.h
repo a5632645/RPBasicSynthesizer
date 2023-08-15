@@ -40,8 +40,7 @@ public:
     // parameter controllers
     FloatKnob m_cutoff;
     FloatKnob m_resonance;
-    FloatKnob m_limitVolume;
-    FloatKnob m_limitK;
+    FloatKnob m_phase;
     //=========================================================================
 private:
     void setAllKnobInvisitable();

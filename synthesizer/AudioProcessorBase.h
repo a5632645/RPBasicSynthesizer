@@ -9,7 +9,7 @@
 */
 
 #pragma once
-#include "WrapParameter.h"
+#include "types.h"
 
 namespace rpSynth::audio {
 class AudioProcessorBase {
@@ -27,27 +27,21 @@ public:
     virtual ~AudioProcessorBase() = default;
 
     virtual void addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) = 0;
-    virtual void updateParameters(size_t numSamples) = 0;
+    //virtual void updateParameters(size_t numSamples) = 0;
     virtual void prepareParameters(FType sampleRate, size_t numSamples) = 0;
     virtual void prepare(FType sampleRate, size_t numSamlpes) = 0;
     virtual void process(size_t beginSamplePos, size_t endSamplePos) = 0;
     virtual void saveExtraState(juce::XmlElement& xml) = 0;
     virtual void loadExtraState(juce::XmlElement& xml, juce::AudioProcessorValueTreeState& apvts) = 0;
+    virtual void onCRClock(size_t numSamplesSkipInSR) = 0;
+
+    // use for audio rounting
+    void setFlag() { m_flag = true; }
+    void clearFlag() { m_flag = false; }
+    bool isOutputNotUsed() const { return !m_flag; }
 private:
+    bool m_flag = false;
     juce::String m_audioProcessorID;
     
 };
-
-//================================================================================
-// Ò»¸öÓÃÓÚ½â¾öPitchµ½HertzÒÔ¼°·´ÏòµÄFloatAttribute
-//================================================================================
-inline static const juce::AudioParameterFloatAttributes g_PitchHertzFloatParameterAttribute
-= [] {
-    return juce::AudioParameterFloatAttributes()
-        .withStringFromValueFunction([](float v, int) {
-        return juce::String(semitoneToHertz(v));
-    }).withValueFromStringFunction([](const juce::String& s) {
-        return hertzToSemitone(juce::jmax(s.getFloatValue(), 0.001f));
-    });
-}();
 }

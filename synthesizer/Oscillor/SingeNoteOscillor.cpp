@@ -42,18 +42,15 @@ void SingeNoteOscillor::addToBlock(StereoBuffer& outputBuffer,
     // do nothing because this oscillor is not work
     if (m_noteNumber < 0) return;
 
-    auto& leftBuffer = outputBuffer.left;
-    auto& rightBuffer = outputBuffer.right;
-
     // calculate frequency
     for (; beginSamplePos < endSamplePos; beginSamplePos++) {
         auto semitone = m_noteNumber
-            + m_parentOscillor->m_semitone.get(beginSamplePos);
+            + m_parentOscillor->m_semitone.getNextValue();
         auto hz = semitoneToHertz(semitone);
         m_testVoice.setFrequency(hz, true);
         auto output = m_testVoice.processSample(static_cast<FType>(0));
-        leftBuffer[beginSamplePos] += output * m_velocity;
-        rightBuffer[beginSamplePos] += output * m_velocity;
+        outputBuffer.buffer[beginSamplePos].left += output * m_velocity;
+        outputBuffer.buffer[beginSamplePos].right += output * m_velocity;
     }
 }
 

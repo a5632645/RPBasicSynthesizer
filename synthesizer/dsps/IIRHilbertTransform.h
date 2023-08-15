@@ -43,9 +43,17 @@ static constexpr Coeffects<type, 8> kCoeffects2 = {
 }
 
 template<typename SampleType, size_t size>
-    requires std::is_floating_point_v<SampleType>
 struct IIRHilbertTransformer {
+    IIRHilbertTransformer() = default;
+
     IIRHilbertTransformer(IIRHilbertCoeffect::Coeffects<SampleType, size> const& initCoeffects) {
+        for (size_t i = 0; i < size; i++) {
+            m_realAPFs[i].setA(initCoeffects.reals[i]);
+            m_imagAPFs[i].setA(initCoeffects.images[i]);
+        }
+    }
+
+    void init(IIRHilbertCoeffect::Coeffects<SampleType, size> const& initCoeffects) {
         for (size_t i = 0; i < size; i++) {
             m_realAPFs[i].setA(initCoeffects.reals[i]);
             m_imagAPFs[i].setA(initCoeffects.images[i]);
@@ -66,12 +74,22 @@ struct IIRHilbertTransformer {
         }
         m_unitDelay = copy;
     }
+
+    void reset() {
+        for (auto& f : m_realAPFs) {
+            f.reset();
+        }
+
+        for (auto& f : m_imagAPFs) {
+            f.reset();
+        }
+    }
 private:
     struct PolyphaseAPF {
         /*        +------g(a)---+
-         *        ¡ý             |
+         *        â†“             |
          * in -> add -+-> z^-2 -+-> add -> out
-         *            |              ¡ü
+         *            |              â†‘
          *            +---g(-a)------+
         */
         SampleType process(SampleType input) {
@@ -85,6 +103,11 @@ private:
 
         void setA(SampleType a) {
             m_a = a;
+        }
+
+        void reset() {
+            m_z0 = SampleType{};
+            m_z1 = SampleType{};
         }
     private:
         SampleType m_z0{};

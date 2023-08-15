@@ -38,23 +38,25 @@ public:
     //=========================================================================
     // implement for AudioProcessorBase
     void addParameterToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout) override;
-    void updateParameters(size_t numSamples) override;
+    //void updateParameters(size_t numSamples) override;
     void prepareParameters(FType sampleRate, size_t numSamples) override;
     void prepare(FType sampleRate, size_t numSamlpes) override;
     void process(size_t beginSamplePos, size_t endSamplePos) override;
     void saveExtraState(juce::XmlElement& xml) override;
     void loadExtraState(juce::XmlElement& xml, juce::AudioProcessorValueTreeState& apvts) override;
+    void onCRClock(size_t) override;
     //=========================================================================
 
     //=========================================================================
     void changeFilter(const juce::String& filterType);
     void addAudioInput(AudioProcessorBase* pProcessor, StereoBuffer* pInput);
-    StereoBuffer* getFilterOutput() { return &m_processorOutputBuffer; }
+    StereoBuffer* getFilterOutput() { return &m_filterOutputBuffer; }
     juce::StringArray getAllFilterNames() const;
     juce::StringRef getCurrentFilterName() const;
     const InputRouterSet& getInputSet(size_t index) const { return m_inputRouter[index]; }
     size_t getNumInputs() const { return m_inputRouter.size(); }
     void doLayout(ui::FilterKnobsPanel&, const juce::String& name);
+    void clearBuffer();
     //=========================================================================
 
     //=========================================================================
@@ -72,7 +74,6 @@ private:
     // Audio router
     StereoBuffer m_filterInputBuffer;
     StereoBuffer m_filterOutputBuffer;
-    StereoBuffer m_processorOutputBuffer;
     std::vector<InputRouterSet> m_inputRouter;
     //=========================================================================
 

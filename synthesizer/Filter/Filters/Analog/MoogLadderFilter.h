@@ -37,22 +37,17 @@ private:
     //================================================================================
     // Filter coeffects
     struct Coeffects {
-        float c_az1;
-        float c_az2;
-        float c_az3;
-        float c_az4;
-        float c_az5;
-        float c_ay1;
-        float c_ay2;
-        float c_ay3;
-        float c_ay4;
-        float c_amf;
-    };
-    Coeffects c_left;
-    Coeffects c_right;
-    //================================================================================
-    forcedinline void processLeft(FType* input, FType* output, size_t begin, size_t end);
-    forcedinline void processRight(FType* input, FType* output, size_t begin, size_t end);
+        PolyFType c_az1;
+        PolyFType c_az2;
+        PolyFType c_az3;
+        PolyFType c_az4;
+        PolyFType c_az5;
+        PolyFType c_ay1;
+        PolyFType c_ay2;
+        PolyFType c_ay3;
+        PolyFType c_ay4;
+        PolyFType c_amf;
+    }m_coeffect;
 private:
     AllFilterParameters& m_parameters;
 };

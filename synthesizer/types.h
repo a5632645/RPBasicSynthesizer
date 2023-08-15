@@ -9,29 +9,88 @@
 */
 
 #pragma once
-#include <vector>
+#include <JuceHeader.h>
 
 namespace rpSynth::audio {
 using FType = float;
 
-struct FPolyType {
-    FType left;
-    FType right;
+struct PolyFType {
+    FType left{};
+    FType right{};
+
+    PolyFType operator+(const PolyFType& f) {
+        return PolyFType{left + f.left,right + f.right};
+    }
+
+    PolyFType operator-(const PolyFType& f) {
+        return PolyFType{left - f.left,right - f.right};
+    }
+
+    PolyFType operator*(const PolyFType& f) {
+        return PolyFType{left * f.left,right * f.right};
+    }
+
+    PolyFType operator/(const PolyFType& f) {
+        return PolyFType{left / f.left,right / f.right};
+    }
 };
+
+template<typename T>
+PolyFType operator+(PolyFType l, T r) {
+    return PolyFType{l.left + r,l.right + r};
+}
+template<typename T>
+PolyFType operator-(PolyFType l, T r) {
+    return PolyFType{l.left - r,l.right - r};
+}
+template<typename T>
+PolyFType operator*(PolyFType l, T r) {
+    return PolyFType{l.left * r,l.right * r};
+}
+template<typename T>
+PolyFType operator/(PolyFType l, T r) {
+    return PolyFType{l.left / r,l.right / r};
+}
+
+template<typename T>
+PolyFType operator+(T l, PolyFType r) {
+    return PolyFType{l + r.left,l + r.right};
+}
+template<typename T>
+PolyFType operator-(T l, PolyFType r) {
+    return PolyFType{l - r.left,l - r.right};
+}
+template<typename T>
+PolyFType operator*(T l, PolyFType r) {
+    return PolyFType{l * r.left,l * r.right};
+}
+template<typename T>
+PolyFType operator/(T l, PolyFType r) {
+    return PolyFType{l / r.left,l / r.right};
+}
 
 // stereo buffer
 struct StereoBuffer {
-    std::vector<FType> left;
-    std::vector<FType> right;
+    std::vector<PolyFType> buffer;
 
     void clear() {
-        std::ranges::fill(left, FType{});
-        std::ranges::fill(right, FType{});
+        std::ranges::fill(buffer, PolyFType{});
     }
 
     void resize(size_t size) {
-        left.resize(size, FType{});
-        right.resize(size, FType{});
+        buffer.resize(size, PolyFType{});
+    }
+
+    // operators
+    PolyFType& operator[](size_t i) {
+        return buffer[i];
+    }
+
+    void addFrom(StereoBuffer& other,size_t begin,size_t end) {
+        size_t num = 2 * (end - begin);
+        juce::FloatVectorOperations::add(reinterpret_cast<FType*>(buffer.data() + begin),
+                                         reinterpret_cast<FType*>(other.buffer.data() + begin),
+                                         num);
     }
 };
 

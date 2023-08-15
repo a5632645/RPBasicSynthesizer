@@ -14,23 +14,18 @@
 
 #include <vector>
 #include "ModulationSetting.h"
-#include "synthesizer/WrapParameter.h"
+//#include "synthesizer/WrapParameter.h"
+#include "synthesizer/NewWrapParameter.h"
 #include "synthesizer/AudioProcessorBase.h"
 
 namespace rpSynth::audio {
-//================================================================================
-// CR³£Á¿
-//================================================================================
-static constexpr double kCRSmoothTime = 0.05;// 50ms
-static constexpr size_t kControlRate = 400;// 400hz
-
 class ModulatorBase : public AudioProcessorBase {
 public:
     using AudioProcessorBase::AudioProcessorBase;
 
     //=========================================================================
     // interfaces
-    virtual void generateData(size_t beginSamplePos, size_t endSamplePos) = 0;
+    //virtual void generateData(size_t beginSamplePos, size_t endSamplePos) = 0;
     virtual void prepareExtra(FType sampleRate, size_t numSamples) = 0;
     virtual void noteOn() = 0;
     virtual void noteOff() = 0;
@@ -41,33 +36,34 @@ public:
     // implement from AudioProcessorBase
     void prepare(FType sampleRate, size_t numSamples) override {
         m_sampleRate = sampleRate;
-        m_outputBuffer.resize(numSamples, FType{});
+        //m_outputBuffer.resize(numSamples, FType{});
         prepareExtra(sampleRate, numSamples);
     }
 
-    void process(size_t beginSamplePos, size_t endSamplePos) override {
-        // first generate all data
-        this->generateData(beginSamplePos, endSamplePos);
+    void process(size_t, size_t) override {}
+    //void process(size_t beginSamplePos, size_t endSamplePos) override {
+    //    // first generate all data
+    //    this->generateData(beginSamplePos, endSamplePos);
 
-        // then add data to parameter buffer
-        for (ModulationSettings* set : m_parametersLinked) {
-            if (set->bypass) continue;
+    //    // then add data to parameter buffer
+    //    for (ModulationSettings* set : m_parametersLinked) {
+    //        if (set->bypass) continue;
 
-            auto& buffer = set->target->m_output;
-            if (set->bipolar) {
-                for (size_t i = beginSamplePos; i < endSamplePos; ++i) {
-                    // [0,1] -> [-1,1]
-                    FType biAmount = static_cast<FType>(2) * m_outputBuffer[i]
-                        - static_cast<FType>(1);
-                    buffer[i] += biAmount * set->amount;
-                }
-            } else {
-                for (size_t i = beginSamplePos; i < endSamplePos; ++i) {
-                    buffer[i] += m_outputBuffer[i] * set->amount;
-                }
-            }
-        }
-    }
+    //        auto& buffer = set->target->m_output;
+    //        if (set->bipolar) {
+    //            for (size_t i = beginSamplePos; i < endSamplePos; ++i) {
+    //                // [0,1] -> [-1,1]
+    //                FType biAmount = static_cast<FType>(2) * m_outputBuffer[i]
+    //                    - static_cast<FType>(1);
+    //                buffer[i] += biAmount * set->amount;
+    //            }
+    //        } else {
+    //            for (size_t i = beginSamplePos; i < endSamplePos; ++i) {
+    //                buffer[i] += m_outputBuffer[i] * set->amount;
+    //            }
+    //        }
+    //    }
+    //}
 
     bool hasNoModulationTargets() const {
         return m_parametersLinked.isEmpty();
@@ -78,7 +74,8 @@ public:
      *        Notice it will not check if this parameter can be modulated.
      * @param pTarget target parameter
     */
-    void addModulation(MyAudioProcessParameter* pTarget) {
+    void addModulation(MyAudioParameter* pTarget) {
+        if (pTarget == nullptr) return;
         for (auto* link : m_parametersLinked) {
             if (link->target == pTarget) {
                 return;
@@ -86,7 +83,7 @@ public:
         }
 
         auto* m = new ModulationSettings(pTarget, this);
-        pTarget->modulatorAdded(m);
+        pTarget->modulationAdded(m);
         m_parametersLinked.add(m);
     }
 
@@ -102,18 +99,18 @@ public:
             }
         }
 
-        set->target->modulatorAdded(set);
+        set->target->modulationAdded(set);
         m_parametersLinked.add(set);
     }
 
     void removeModulation(ModulationSettings* pMS) {
-        pMS->target->modulatorRemoved(pMS);
+        pMS->target->modulationRemoved(pMS);
         m_parametersLinked.removeObject(pMS);
     }
 
     void removeAllModulations() {
-        for (auto* link : m_parametersLinked) {
-            link->target->m_modulationSettings.clear();
+        for (auto* set : m_parametersLinked) {
+            set->target->modulationRemoved(this);
         }
 
         m_parametersLinked.clear(true);
@@ -123,9 +120,9 @@ public:
         return m_sampleRate;
     }
 
-    std::vector<FType>& getOutputBuffer() {
-        return m_outputBuffer;
-    }
+    //std::vector<FType>& getOutputBuffer() {
+    //    return m_outputBuffer;
+    //}
 
     int getNumModulations() const {
         return m_parametersLinked.size();
@@ -167,10 +164,10 @@ public:
         for (auto* link : modulationSettingsXML->getChildWithTagNameIterator(g_myStrings.kParameterLinkTag)) {
             const auto& paramID = link->getStringAttribute("paramID");
             auto* pParameter = apvts.getParameter(paramID);
-            if (auto* pWrapParameter = dynamic_cast<MyHostedAudioProcessorParameter*>(pParameter);
+            if (auto* pWrapParameter = dynamic_cast<MyHostParameter*>(pParameter);
                 pWrapParameter != nullptr) {
                 ModulationSettings* setting = new ModulationSettings;
-                setting->target = pWrapParameter->getMyAudioProcessorParameter();
+                setting->target = pWrapParameter->getAudioParameter();
                 setting->modulator = this;
                 setting->bipolar = link->getBoolAttribute("bipolar");
                 setting->bypass = link->getBoolAttribute("bypass");
@@ -182,13 +179,22 @@ public:
         loadExtraState(*thisXML, apvts);
     }
 
+    FType getOutputValue() const {
+        return m_outputValue;
+    }
+
+    void setOutputValue(FType newVal) {
+        m_outputValue = newVal;
+    }
+
 protected:
     // SR
     FType m_sampleRate{};
 
     // modulations and output
     juce::OwnedArray<ModulationSettings> m_parametersLinked;
-    std::vector<FType> m_outputBuffer;
+    FType m_outputValue{};
+    //std::vector<FType> m_outputBuffer;
 };
 }
 
