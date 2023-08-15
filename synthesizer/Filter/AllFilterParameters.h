@@ -20,17 +20,20 @@ struct AllFilterParameters {
     MyAudioParameter cutoff;
     MyAudioParameter resonance;
     MyAudioParameter phase;
+    MyAudioParameter feedback;
 
     void onCRClock() {
         cutoff.onCRClock();
         resonance.onCRClock();
         phase.onCRClock();
+        feedback.onCRClock();
     }
 
     void prepare(FType sampleRate) {
         cutoff.prepare(sampleRate);
         resonance.prepare(sampleRate);
         phase.prepare(sampleRate);
+        feedback.prepare(sampleRate);
     }
 };
 };

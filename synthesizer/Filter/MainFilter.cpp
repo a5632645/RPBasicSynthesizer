@@ -13,8 +13,11 @@
 #include "AllFilterParameters.h"
 
 #include "Filters/Analog/MoogLadderFilter.h"
+
 #include "Filters/Digital/CombFilterPos.h"
 #include "Filters/Digital/CombFilterNeg.h"
+#include "Filters/Digital/Phaser4Neg.h"
+#include "Filters/Digital/Phaser4Pos.h"
 
 static const juce::String kFilterNameAttribute = "filterName";
 
@@ -27,6 +30,8 @@ MainFilter::MainFilter(const juce::String& ID)
     m_allFilters.set(analog::MoogLadderFilter::kName, std::make_shared<analog::MoogLadderFilter>(*m_allFilterParameters));
     m_allFilters.set(digital::CombPos::kName, std::make_shared<digital::CombPos>(*m_allFilterParameters));
     m_allFilters.set(digital::CombNeg::kName, std::make_shared<digital::CombNeg>(*m_allFilterParameters));
+    m_allFilters.set(digital::Phaser4Neg::kName, std::make_shared<digital::Phaser4Neg>(*m_allFilterParameters));
+    m_allFilters.set(digital::Phaser4Pos::kName, std::make_shared<digital::Phaser4Pos>(*m_allFilterParameters));
 
     // Set the default Filter impl
     m_newFilterName = analog::MoogLadderFilter::kName;
@@ -50,12 +55,17 @@ void MainFilter::addParameterToLayout(juce::AudioProcessorValueTreeState::Parame
                std::make_unique<MyHostParameter>(m_allFilterParameters->resonance,
                                                  combineWithID("resonance"),
                                                  "resonance",
-                                                 juce::NormalisableRange <float>(0.f, 1.f, 0.01f),
+                                                 juce::NormalisableRange <float>(0.f, 0.99f, 0.01f),
                                                  0.f),
                std::make_unique<MyHostParameter>(m_allFilterParameters->phase,
                                                  combineWithID("Phase"),
                                                  "Phase",
                                                  juce::NormalisableRange<float>(0.f, 1.f, 0.01f),
+                                                 0.f),
+               std::make_unique<MyHostParameter>(m_allFilterParameters->feedback,
+                                                 combineWithID("Feedback"),
+                                                 "Feedback",
+                                                 juce::NormalisableRange<float>(0.f, 0.9f, 0.01f),
                                                  0.f)
     );
 

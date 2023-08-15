@@ -312,8 +312,8 @@ public:
                 * m_fbValue;
             PolyFType input = sample + fbVal;
             for (int j = 0; j < state; j++) {
-                input.left = m_APFArray[j].processSingle(m_APFCoeffects[0], input.left, 0);
-                input.right = m_APFArray[j].processSingle(m_APFCoeffects[1], input.right, 1);
+                input.left = m_APFArray[j][0].processSingle(m_APFCoeffects[0], input.left);
+                input.right = m_APFArray[j][1].processSingle(m_APFCoeffects[1], input.right);
             }
 
             //FPolyType hilbertMid = hilbert<channel>(input);
@@ -361,8 +361,8 @@ public:
             PolyFType withFb = sample + p.feedback.getNextValue() * m_fbValue;
             //auto withFb = sample + p.feedback.get(i) * getFeedback<channel>();
             for (int j = 0; j < state; j++) {
-                withFb.left = m_APFArray[j].processSingle(m_APFCoeffects[0], withFb.left, 0);
-                withFb.right = m_APFArray[j].processSingle(m_APFCoeffects[1], withFb.right, 1);
+                withFb.left = m_APFArray[j][0].processSingle(m_APFCoeffects[0], withFb.left);
+                withFb.right = m_APFArray[j][1].processSingle(m_APFCoeffects[1], withFb.right);
             }
             //auto mixout = sample + p.mix.get(i) * withFb;
             PolyFType mixout = sample + p.mix.getNextValue() * withFb;
@@ -396,8 +396,9 @@ private:
     juce::dsp::FirstOrderTPTFilter<FType> fbHF;
 
     // 全通滤波器组
-    std::array<SecondOrderAllPassFilter2<FType, 2>, kMaxPhaserState> m_APFArray;
-    std::array<SecondOrderAllPassFilter2<FType, 2>::Coeffects, 2> m_APFCoeffects;
+    using APF = SecondOrderAllPassFilter2<FType, FType>;
+    std::array<std::array<APF, 2>, kMaxPhaserState> m_APFArray;
+    std::array<APF::Coeffects, 2> m_APFCoeffects;
 
     // 希尔伯特变换器
     IIRHilbertTransformer<FType, 4> hilbertL{IIRHilbertCoeffect::kCoeffects1<FType>};

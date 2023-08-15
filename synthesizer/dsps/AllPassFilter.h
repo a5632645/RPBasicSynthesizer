@@ -12,43 +12,41 @@
 
 #include <JuceHeader.h>
 
-template<typename SampleType, size_t numChannel>
+
+
+template<typename ParamType, typename SampleType>
 class SecondOrderAllPassFilter2 {
 public:
-    // https://thewolfsound.com/allpass-filter/
     struct Coeffects {
         /**
          * @param fre 0.f < fre < 0.5 * SR
          * @param sampleRate SR
         */
-        void setCenterFrequency(SampleType fre, SampleType sampleRate) {
-            jassert(juce::isPositiveAndBelow(fre, static_cast<SampleType>(0.5) * sampleRate));
+        void setCenterFrequency(ParamType fre, ParamType sampleRate) {
+            jassert(juce::isPositiveAndBelow(fre, static_cast<ParamType>(0.5) * sampleRate));
 
-            m_d = -std::cos(juce::MathConstants<SampleType>::twoPi * fre / sampleRate);
+            m_d = -std::cos(juce::MathConstants<ParamType>::twoPi * fre / sampleRate);
         }
 
         /**
          * @param bw 0 < bw < 0.5
          * @param sampleRate SR
         */
-        void setBandWidth(SampleType bw, SampleType /*sampleRate*/) {
-            jassert(juce::isPositiveAndBelow(bw, static_cast<SampleType>(0.5)));
+        void setBandWidth(ParamType bw, ParamType /*sampleRate*/) {
+            jassert(juce::isPositiveAndBelow(bw, static_cast<ParamType>(0.5)));
 
-            auto t = std::tan(juce::MathConstants<SampleType>::pi * bw);
-            auto one = static_cast<SampleType>(1);
-            m_c = (t - one) / (t + one);
+            auto t = std::tan(juce::MathConstants<ParamType>::pi * bw);
+            m_c = (t - 1) / (t + 1);
         }
 
-        SampleType m_d;
-        SampleType m_c;
+        ParamType m_d;
+        ParamType m_c;
     };
 
-    SampleType processSingle(Coeffects const& coeffects, SampleType input, int channel) {
-        InternalData& data = m_data[channel];
-        auto one = static_cast<SampleType>(1);
-
-        auto newV = input - coeffects.m_d * (one - coeffects.m_c) * data.v0 + coeffects.m_c * data.v1;
-        auto newY = -coeffects.m_c * newV + coeffects.m_d * (one - coeffects.m_c) * data.v0 + data.v1;
+    // https://thewolfsound.com/allpass-filter/
+    SampleType processSingle(Coeffects const& coeffects, SampleType input) {
+        auto newV = input - coeffects.m_d * (1 - coeffects.m_c) * data.v0 + coeffects.m_c * data.v1;
+        auto newY = -coeffects.m_c * newV + coeffects.m_d * (1 - coeffects.m_c) * data.v0 + data.v1;
 
         data.v1 = data.v0;
         data.v0 = newV;
@@ -58,7 +56,7 @@ public:
     }
 
     void reset() {
-        std::ranges::fill(m_data, InternalData{});
+        data = InternalData{};
     }
 
 private:
@@ -69,5 +67,5 @@ private:
         SampleType y1{};
     };
 
-    std::array<InternalData, numChannel> m_data;
+    InternalData data;
 };

@@ -41,6 +41,7 @@ public:
     FloatKnob m_cutoff;
     FloatKnob m_resonance;
     FloatKnob m_phase;
+    FloatKnob m_feedback;
     //=========================================================================
 private:
     void setAllKnobInvisitable();

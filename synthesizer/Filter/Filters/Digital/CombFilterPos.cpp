@@ -17,7 +17,7 @@ void CombPos::process(StereoBuffer& input, StereoBuffer& output, size_t begin, s
     for (; begin < end; begin++) {
         FType delay = m_smoothedDelaySamples.getNextValue();
         FType phase = m_parameters.phase.getNextValue();
-        PolyFType withFB = input[begin] + m_lastOutput * m_parameters.resonance.getNextValue();
+        PolyFType withFB = input[begin] + m_lastOutput * m_parameters.feedback.getNextValue();
         m_delayBuffer[m_writePosition] = withFB;
         size_t readPosition = static_cast<size_t>(m_writePosition - delay + m_delayBufferSize) % m_delayBufferSize;
         size_t nextPosition = static_cast<size_t>(readPosition + 1) % m_delayBufferSize;
@@ -48,11 +48,11 @@ void CombPos::prepare(FType sampleRate, size_t /*numSamples*/) {
 
 void CombPos::doLayout(ui::FilterKnobsPanel& p) {
     p.m_cutoff.setVisible(true);
-    p.m_resonance.setVisible(true);
+    p.m_feedback.setVisible(true);
     p.m_phase.setVisible(true);
 
     p.m_cutoff.setBounds(0, 0, 70, 70);
-    p.m_resonance.setBounds(80, 0, 70, 70);
+    p.m_feedback.setBounds(80, 0, 70, 70);
     p.m_phase.setBounds(160, 0, 70, 70);
 }
 
